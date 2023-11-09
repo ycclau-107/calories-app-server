@@ -8,6 +8,9 @@ dependencies:
   expo:
     specifier: ~49.0.15
     version: 49.0.16(@babel/core@7.23.2)
+  expo-barcode-scanner:
+    specifier: ^12.7.0
+    version: 12.7.0(expo@49.0.16)
   expo-status-bar:
     specifier: ~1.6.0
     version: 1.6.0
@@ -3569,6 +3572,15 @@ packages:
       - supports-color
     dev: false
 
+  /expo-barcode-scanner@12.7.0(expo@49.0.16):
+    resolution: {integrity: sha512-HTy5mRHRtOM/3xrVXN9wUBIQGXLdvqGgHkrSxgvJzqLQBjafq+uEiUxTPRyvNofWt3gMZXcy8ZqqW7gaD3xXDg==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 49.0.16(@babel/core@7.23.2)
+      expo-image-loader: 4.4.0(expo@49.0.16)
+    dev: false
+
   /expo-constants@14.4.2(expo@49.0.16):
     resolution: {integrity: sha512-nOB122DOAjk+KrJT69lFQAoYVQGQjFHSigCPVBzVdko9S1xGsfiOH9+X5dygTsZTIlVLpQJDdmZ7ONiv3i+26w==}
     peerDependencies:
@@ -3597,6 +3609,14 @@ packages:
     dependencies:
       expo: 49.0.16(@babel/core@7.23.2)
       fontfaceobserver: 2.3.0
+    dev: false
+
+  /expo-image-loader@4.4.0(expo@49.0.16):
+    resolution: {integrity: sha512-dq88tiRB8aB1U+O/oJI7IY4VU9Nu2iDjEwR8QDfLtD4xWd5lNGoyic5Vh7911E1qNJFqNMSVIVzOD5l1SQ3A6g==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 49.0.16(@babel/core@7.23.2)
     dev: false
 
   /expo-keep-awake@12.3.0(expo@49.0.16):
