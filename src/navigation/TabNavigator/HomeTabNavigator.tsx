@@ -1,8 +1,8 @@
 import * as React from "react";
 
 // import stack navigators
-import HomeStackNavigator from "../StackNavigator/HomeStackNavigator";
 import HomeScreen from "../../screens/HomeScreen";
+import BarcodeScanner from "../../screens/BarcodeScanner";
 
 // import icon library
 import Icon from "@expo/vector-icons/MaterialIcons";
@@ -26,11 +26,11 @@ const HomeTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Home2"
-        component={HomeScreen}
+        name="Camera"
+        component={BarcodeScanner}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={color} size={size} />
+            <Icon name="camera" color={color} size={size} />
           ),
           headerShown: false,
         }}
