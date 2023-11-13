@@ -50,6 +50,7 @@ con.execute("""CREATE TABLE IF NOT EXISTS calorie_record (
 #create exercise record table
 con.execute("""CREATE TABLE IF NOT EXISTS exercise_record (
             E_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            RECORD_DATE TIMESTAMP DEFAULT CURRENTN_TIMESTAMP,
             USER_ID INTEGER NOT NULL,
             CALORIES INTEGER NOT NULL,
             HEARTRATE INTEGER
@@ -58,7 +59,9 @@ con.execute("""CREATE TABLE IF NOT EXISTS exercise_record (
 #create weight record table
 con.execute("""CREATE TABLE IF NOT EXISTS weight(
             WEIGHT_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            USER_ID 
+            USER_ID INTEGER NOT NULL,
+            WEIGHT FLOAT NOT NULL,
+            BODY_FAT FLOAT NOT NULL
 );""")
 
 #insert demo data

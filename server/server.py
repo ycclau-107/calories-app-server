@@ -1,6 +1,7 @@
 import flask
 from flask import request
 import sqlite3
+import time
 
 app = flask.Flask(__name__)
 #app.config["DEBUG"] = True //Enable debug mode to enable hot-reloader
@@ -164,17 +165,17 @@ def calorie_report():
 def weight_addrecord():
     user_id = request.args.get('user_id')
     weight = request.args.get('weight')
-    time = request.args.get('time')
-
     
     con = sqlite3.connect('calories-db.db')
     con.execute("""
-        INSERT INTO weight (user_id, weight, time) VALUES(?,?,?,)""",
-        (user_id, weight, time))
+        INSERT INTO weight (user_id, weight) VALUES(?,?,)""",
+        (user_id, weight))
     
     con.commit()
     con.close()
-    
+    return {'result': "weight record added"}
+
+
 @app.route('/calorie/add', methods = ['POST'])
 def calorie_record_add():
     user_id = request.args.get('user_id','')
