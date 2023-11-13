@@ -16,8 +16,7 @@ con.execute(
     );""")
 
 #create target table
-con.execute(
-    """CREATE TABLE IF NOT EXISTS target (
+con.execute("""CREATE TABLE IF NOT EXISTS target (
     TARGET_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     USER_ID INTEGER NOT NULL,
     UPDATED_TIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -35,32 +34,32 @@ con.execute(
     FAT_GRAM NUMBER NOT NULL,
     FAT_PER NUMBER NOT NULL,
     FAT_CAL NUMBER NOT NULL
-    );"""
-)
+    );""")
 
 #create calorie record table
-con.execute(
-    """
-    CREATE TABLE IF NOT EXISTS calorie_record(
-    C_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    USER_ID INTEGER NOT NULL,
-    PROTEIN_GRAM INTEGER NOT NULL,
-    CARBS_GRAM INTEGER NOT NULL,
-    FAT_GRAM INTEGER NOT NULL,
-    );
-    """
-)
+con.execute("""CREATE TABLE IF NOT EXISTS calorie_record (
+            C_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            RECORD_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            USER_ID INTEGER NOT NULL,
+            CALORIES INTEGER NOT NULL,
+            PROTEIN_GRAM INTEGER,
+            CARBS_GRAM INTEGER,
+            FAT_GRAM INTEGER
+            );""")
 
-#create exercise reocrd table
-con.execute(
-    """
-    CREATE TABLE IF NOT EXISTS exercise_record(
-    E_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    USER_ID INTEGER NOT NULL,
-    CALORIES INTEGER NOT NULL,
-    HEARTRATE INTEGER,
-    );
-""")
+#create exercise record table
+con.execute("""CREATE TABLE IF NOT EXISTS exercise_record (
+            E_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            USER_ID INTEGER NOT NULL,
+            CALORIES INTEGER NOT NULL,
+            HEARTRATE INTEGER
+            );""")
+
+#create weight record table
+con.execute("""CREATE TABLE IF NOT EXISTS weight(
+            WEIGHT_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            USER_ID 
+);""")
 
 #insert demo data
 demoData_profile = [{'username': 'demo',

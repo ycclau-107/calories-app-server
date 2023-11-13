@@ -12,7 +12,7 @@ def profile_get():
     password = request.args.get('password','')
 
     con = sqlite3.connect('calories-db.db')
-    cursor = con.exeute(
+    cursor = con.execute(
         """SELECT ID, NAME FROM profile
         WHERE USERNAME = ? AND PASSWORD = ?""",
         (username, password))
@@ -95,11 +95,92 @@ def target_udpate():
     con.close()
     return outdata
 
-def calorie_record_add(user_id, protein_gram, carbs_gram, fat_gram):
-    # user_id = request.args.get('user_id','')
-    # protein_gram = request.args.get('protein_gram,','')
-    # carbs_gram = request.args.get('carbs_gram,','')
-    # fat_gram = request.args.get('fat_gram,','')
+@app.route('/calories/dailyreport',methods = ['GET'])
+def calorie_report():
+    user_id = request.args.get('user_id','')
+
+    con = sqlite3.connect('calories-db.db')
+    cursor_t = con.execute("""
+        SELECT TDEE, 
+        PROTEIN_GRAM,
+        CARBS_GRAM,
+        FAT_GRAM,
+        WHERE USER_ID = ?""",
+        (user_id,))
+        
+    row_t = cursor_t.fetchone()
+
+    cursor_r = con.execute("""
+    SELECT SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calories
+    WHERE USER_ID = ? 
+    AND RECORD_DATE = DATE('now')""",
+    (user_id,))
+    
+    row_r = cursor_r.fetchone()
+
+    outdata = {}
+    if(row_t !=None):
+
+        calories_t = row_t[0]
+        protein_t = row_t[1]
+        carbs_t = row_t[2]
+        fat_t = row_t[3]
+
+        if(row_r != None):
+            calories_sum = row_r[0]
+            protein_sum = row_r[1]
+            carbs_sum = row_r[2]
+            fat_sum = row_r[3]
+
+        elif (row_r == None):
+            calories_sum = 0
+            protein_sum = 0
+            carbs_sum = 0
+            fat_sum = 0
+        
+        calories_per = int(calories_sum / calories_t * 100)
+        protein_per = int(protein_sum / protein_t * 100)
+        carbs_per = int(carbs_sum / carbs_t * 100)
+        fat_per = int(fat_sum / fat_t * 100)
+
+        outdata = {
+            "calorie_sum": calories_sum,
+            "calorie_per": calories_per,
+            "protein_sum": protein_sum,
+            "protein_per": protein_per,
+            "carbs_sum": carbs_sum,
+            "carbs_per": carbs_per,
+            "fat_sum": fat_sum,
+            "fat_per": fat_per
+        }
+    else:
+        outdata = {"error": "Target has not been set."}
+    
+    con.commit()
+    con.close()
+    return outdata
+
+@app.route('/weight/add',methods = ['POST'])
+def weight_addrecord():
+    user_id = request.args.get('user_id')
+    weight = request.args.get('weight')
+    time = request.args.get('time')
+
+    
+    con = sqlite3.connect('calories-db.db')
+    con.execute("""
+        INSERT INTO weight (user_id, weight, time) VALUES(?,?,?,)""",
+        (user_id, weight, time))
+    
+    con.commit()
+    con.close()
+    
+@app.route('/calorie/add', methods = ['POST'])
+def calorie_record_add():
+    user_id = request.args.get('user_id','')
+    protein_gram = request.args.get('protein_gram,','')
+    carbs_gram = request.args.get('carbs_gram,','')
+    fat_gram = request.args.get('fat_gram,','')
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
@@ -109,16 +190,24 @@ def calorie_record_add(user_id, protein_gram, carbs_gram, fat_gram):
     )
     con.commit()
     con.close()
+    return {"result": "calorie record added"}
 
-def exercise_record_add(user_id, calories, type, heartrate):
+@app.route('/exercise/add', methods = ['POST'])
+def exercise_record_add():
+    user_id = request.args.get('user_id')
+    calories = request.args.get('calories')
+    type = request.args.get('type')
+    heartrate = request.args.get('heartrate')
+
     con = sqlite3.connect('calories-db.db')
     con.execute(
-        """INSERT INTO exercise_record (USER_ID, CALORIES, TYPE, HEARTRATE VALUES (?, ?, ?, ?)""",
+        """INSERT INTO exercise_record 
+        (USER_ID, CALORIES, TYPE, HEARTRATE VALUES (?, ?, ?, ?)""",
         (user_id, calories, type, heartrate)
     )
     con.commit()
     con.close()
+    return {"result": "exercise record added"}
 
 # adds hots = "0.0.0.0" to make the server publicly available
 app.run(host = "0.0.0.0")
-
