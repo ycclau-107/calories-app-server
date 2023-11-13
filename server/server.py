@@ -96,7 +96,6 @@ def target_udpate():
     return outdata
 
 def calorie_record_add(user_id, protein_gram, carbs_gram, fat_gram):
-
     # user_id = request.args.get('user_id','')
     # protein_gram = request.args.get('protein_gram,','')
     # carbs_gram = request.args.get('carbs_gram,','')
