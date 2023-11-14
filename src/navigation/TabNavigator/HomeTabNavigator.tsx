@@ -3,6 +3,7 @@ import * as React from "react";
 // import stack navigators
 import HomeScreen from "../../screens/HomeScreen";
 import BarcodeScanner from "../../screens/BarcodeScanner";
+import ProfileScreen from "../../screens/ProfileScreen";
 
 // import icon library
 import Icon from "@expo/vector-icons/MaterialIcons";
@@ -22,7 +23,8 @@ const HomeTabNavigator = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" color={color} size={size} />
           ),
-          headerShown: false,
+          tabBarShowLabel: false,
+          headerShown: true,
         }}
       />
       <Tab.Screen
@@ -32,7 +34,19 @@ const HomeTabNavigator = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name="camera" color={color} size={size} />
           ),
-          headerShown: false,
+          tabBarShowLabel: false,
+          headerShown: true,
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="person" color={color} size={size} />
+          ),
+          tabBarShowLabel: false,
+          headerShown: true,
         }}
       />
     </Tab.Navigator>
