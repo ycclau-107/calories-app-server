@@ -6,6 +6,7 @@ from flask import jsonify
 app = flask.Flask(__name__)
 #app.config["DEBUG"] = True //Enable debug mode to enable hot-reloader
 
+#http://10.68.166.107:5000/profile/get?username=demo&password=1234
 #log in
 @app.route('/profile/get', methods = ['GET'])
 def profile_get():
@@ -96,12 +97,13 @@ def target_udpate():
     con.close()
     return outdata
 
+#http://10.68.166.107:5000/target/get?user_id=1
 @app.route('/target/get', methods = ['GET'])
 def target_get():
     user_id = request.args.get('user_id','')
 
     con = sqlite3.connect('calories-db.db')
-    cursor = con.execute("""SELEC BMR, 
+    cursor = con.execute("""SELECT BMR, 
                         TDEE, 
                         PROTEIN_GRAM, 
                         PROTEIN_PER, 
@@ -137,7 +139,6 @@ def target_get():
             'calorie': row[10],
         }
     }
-
     return outdata
 
 @app.route('/calorie/addrecord', methods = ['POST'])
@@ -157,6 +158,7 @@ def calorie_addrecord():
     con.close()
     return {"result": "calorie record added"}
 
+#http://10.68.166.107:5000/calories/get/dailyreport?user_id=1
 @app.route('/calories/get/dailyreport',methods = ['GET'])
 def calorie_report():
     user_id = request.args.get('user_id','')
@@ -188,13 +190,12 @@ def calorie_report():
         carbs_t = row_t[2]
         fat_t = row_t[3]
 
-        if(row_r != None):
-            calories_sum = row_r[0]
-            protein_sum = row_r[1]
-            carbs_sum = row_r[2]
-            fat_sum = row_r[3]
+        calories_sum = row_r[0]
+        protein_sum = row_r[1]
+        carbs_sum = row_r[2]
+        fat_sum = row_r[3]
 
-        elif (row_r == None):
+        if(calories_sum is None and protein_sum is None and carbs_sum is None and fat_sum is None):
             calories_sum = 0
             protein_sum = 0
             carbs_sum = 0
@@ -236,12 +237,13 @@ def weight_addrecord():
     con.close()
     return {'result': "weight record added"}
 
+#http://10.68.166.107:5000/weight/get?user_id=1
 @app.route('/weight/get', methods = ['GET'])
 def weight_getrecord():
     user_id = request.args.get('user_id','')
     
     # Connect to the database
-    conn = sqlite3.connect('your_database.db')
+    conn = sqlite3.connect('calories-db.db')
     cursor = conn.cursor()
 
     # Execute the SELECT query
@@ -293,11 +295,12 @@ def exercise_record_add():
     con.close()
     return {"result": "exercise record added"}
 
+#http://10.68.166.107:5000/exercise/get?user_id=1
 @app.route('/exercise/get', methods = ['GET'])
 def exercise_getrecord():
     user_id = request.args.get('userid')
     
-    conn = sqlite3.connect('your_database.db')
+    conn = sqlite3.connect('calories-db.db')
     cursor = conn.cursor()
 
     cursor.execute("SELECT RECORD_DATE, CALORIES, HEARTRATE FROM exercise WHERE USER_ID = ?", (user_id,))
