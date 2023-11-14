@@ -1,7 +1,7 @@
 import flask
 from flask import request
 import sqlite3
-import time
+from flask import jsonify
 
 app = flask.Flask(__name__)
 #app.config["DEBUG"] = True //Enable debug mode to enable hot-reloader
@@ -96,7 +96,68 @@ def target_udpate():
     con.close()
     return outdata
 
-@app.route('/calories/dailyreport',methods = ['GET'])
+@app.route('/target/get', methods = ['GET'])
+def target_get():
+    user_id = request.args.get('user_id','')
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute("""SELEC BMR, 
+                        TDEE, 
+                        PROTEIN_GRAM, 
+                        PROTEIN_PER, 
+                        PROTEIN_CAL, 
+                        CARBS_GRAM, 
+                        CARBS_PER, 
+                        CARBS_CAL, 
+                        FAT_GRAM, 
+                        FAT_PER, 
+                        FAT_CAL
+                        FROM target
+                        WHERE USER_ID = ?
+                        """,
+                        (user_id,))
+    
+    row = cursor.fetchone()
+    outdata = {
+        'bmr': row[0],
+        'tdee': row[1],
+        'protein':{
+            'percentage': row[3],
+            'gram': row[2],
+            'calorie': row[4],
+        },
+        'carbs':{
+            'percentage': row[6],
+            'gram': row[5],
+            'calorie': row[7],
+        },
+        'fat':{
+            'percentage': row[9],
+            'gram': row[8],
+            'calorie': row[10],
+        }
+    }
+
+    return outdata
+
+@app.route('/calorie/addrecord', methods = ['POST'])
+def calorie_addrecord():
+    user_id = request.args.get('user_id','')
+    protein_gram = request.args.get('protein_gram,','')
+    carbs_gram = request.args.get('carbs_gram,','')
+    fat_gram = request.args.get('fat_gram,','')
+
+    con = sqlite3.connect('calories-db.db')
+    con.execute(
+        """INSERT INTO calorie_record (USER_ID, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
+        VALUES (?, ?, ?, ?)""",
+        (user_id, protein_gram, carbs_gram, fat_gram)
+    )
+    con.commit()
+    con.close()
+    return {"result": "calorie record added"}
+
+@app.route('/calories/get/dailyreport',methods = ['GET'])
 def calorie_report():
     user_id = request.args.get('user_id','')
 
@@ -105,14 +166,14 @@ def calorie_report():
         SELECT TDEE, 
         PROTEIN_GRAM,
         CARBS_GRAM,
-        FAT_GRAM,
+        FAT_GRAM FROM target
         WHERE USER_ID = ?""",
         (user_id,))
         
     row_t = cursor_t.fetchone()
 
     cursor_r = con.execute("""
-    SELECT SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calories
+    SELECT SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calorie
     WHERE USER_ID = ? 
     AND RECORD_DATE = DATE('now')""",
     (user_id,))
@@ -175,30 +236,52 @@ def weight_addrecord():
     con.close()
     return {'result': "weight record added"}
 
-
-@app.route('/calorie/add', methods = ['POST'])
-def calorie_record_add():
+@app.route('/weight/get', methods = ['GET'])
+def weight_getrecord():
     user_id = request.args.get('user_id','')
-    protein_gram = request.args.get('protein_gram,','')
-    carbs_gram = request.args.get('carbs_gram,','')
-    fat_gram = request.args.get('fat_gram,','')
+    
+    # Connect to the database
+    conn = sqlite3.connect('your_database.db')
+    cursor = conn.cursor()
 
-    con = sqlite3.connect('calories-db.db')
-    con.execute(
-        """INSERT INTO calorie_record (USER_ID, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
-        VALUES (?, ?, ?, ?)""",
-        (user_id, protein_gram, carbs_gram, fat_gram)
-    )
-    con.commit()
-    con.close()
-    return {"result": "calorie record added"}
+    # Execute the SELECT query
+    cursor.execute("SELECT RECORD_DATE, WEIGHT, BODY_FAT FROM weight WHERE user_id = ?", (user_id,))
+
+    # Fetch all the rows returned by the query
+    rows = cursor.fetchall()
+
+    # Create a list to store the weight records
+    weight_records = []
+
+    # Process the fetched data
+    for row in rows:
+        # Access the columns by index or name
+        record_date = row[0]
+        weight = row[1]
+        body_fat = row[2]
+
+        # Create a dictionary for the weight record
+        weight_record = {
+            'record_date': record_date,
+            'weight': weight,
+            'body_fat': body_fat
+        }
+
+        # Append the weight record to the list
+        weight_records.append(weight_record)
+
+    # Close the connection
+    conn.close()
+
+    # Return the weight records as JSON
+    return jsonify(weight_records)
 
 @app.route('/exercise/add', methods = ['POST'])
 def exercise_record_add():
-    user_id = request.args.get('user_id')
-    calories = request.args.get('calories')
-    type = request.args.get('type')
-    heartrate = request.args.get('heartrate')
+    user_id = request.form.get('user_id')
+    calories = request.form.get('calories')
+    type = request.form.get('type')
+    heartrate = request.form.get('heartrate')
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
@@ -209,6 +292,45 @@ def exercise_record_add():
     con.commit()
     con.close()
     return {"result": "exercise record added"}
+
+@app.route('/exercise/get', methods = ['GET'])
+def exercise_getrecord():
+    user_id = request.args.get('userid')
+    
+    conn = sqlite3.connect('your_database.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT RECORD_DATE, CALORIES, HEARTRATE FROM exercise WHERE USER_ID = ?", (user_id,))
+
+    # Fetch all the rows returned by the query
+    rows = cursor.fetchall()
+
+    # Create a list to store the exercise records
+    exercise_records = []
+
+    # Process the fetched data
+    for row in rows:
+        # Access the columns by index or name
+        record_date = row[0]
+        calories = row[1]
+        heart_rate = row[2]
+
+        # Create a dictionary for the exercise record
+        exercise_record = {
+            'record_date': record_date,
+            'calories': calories,
+            'heart_rate': heart_rate
+        }
+
+        # Append the exercise record to the list
+        exercise_records.append(exercise_record)
+
+    # Close the connection
+    conn.close()
+
+    # Return the exercise records as JSON
+    return jsonify(exercise_records)
+    
 
 # adds hots = "0.0.0.0" to make the server publicly available
 app.run(host = "0.0.0.0")

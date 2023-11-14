@@ -37,7 +37,7 @@ con.execute("""CREATE TABLE IF NOT EXISTS target (
     );""")
 
 #create calorie record table
-con.execute("""CREATE TABLE IF NOT EXISTS calorie_record (
+con.execute("""CREATE TABLE IF NOT EXISTS calorie (
             C_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             RECORD_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             USER_ID INTEGER NOT NULL,
@@ -48,7 +48,7 @@ con.execute("""CREATE TABLE IF NOT EXISTS calorie_record (
             );""")
 
 #create exercise record table
-con.execute("""CREATE TABLE IF NOT EXISTS exercise_record (
+con.execute("""CREATE TABLE IF NOT EXISTS exercise (
             E_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             RECORD_DATE TIMESTAMP DEFAULT CURRENTN_TIMESTAMP,
             USER_ID INTEGER NOT NULL,
@@ -64,20 +64,96 @@ con.execute("""CREATE TABLE IF NOT EXISTS weight(
             WEIGHT FLOAT NOT NULL,
             BODY_FAT FLOAT NOT NULL
 );""")
-
+    
 #insert demo data
 demoData_profile = [{'username': 'demo',
             'password': '1234',
-            'name': 'Faraday'},
+            'name': 'Jacky'},
             
             {'username': 'ycclau',
             'password': '12345',
             'name': 'Chris Lau'}
             ]
 
+
 for profile in demoData_profile:
     insertQuery = "INSERT INTO profile (USERNAME, PASSWORD, NAME) values (?,?,?);"
     con.execute(insertQuery,(profile['username'],profile['password'],profile['name']))
+
+#insert target data into account demo
+demo_bmr = 1600
+demo_tdee = 1800
+demo_proteinPercentage = 0.5
+demo_carbsPercentage = 0.2
+demo_fatPercentage = 0.3
+
+demo_target = {
+    'calorieIntake': demo_tdee,
+    'style': 'Low Carbohydrates',
+    'carbs':{
+        'percentage': demo_carbsPercentage,
+        'gram': demo_carbsPercentage*demo_tdee/4,
+        'calorie': demo_carbsPercentage*demo_tdee,
+    },
+    'protein':{
+        'percentage': demo_proteinPercentage,
+        'gram': demo_proteinPercentage*demo_tdee/4,
+        'calorie': demo_proteinPercentage*demo_tdee,
+    },
+    'fat':{
+        'percentage': demo_fatPercentage,
+        'gram': demo_fatPercentage*demo_tdee/9,
+        'calorie': demo_fatPercentage*demo_tdee,
+    },
+}
+
+demo_style = demo_target['style']
+demo_carbs_gram = demo_target['carbs']['gram']
+demo_carbs_cal = demo_target['carbs']['calorie']
+demo_protein_gram = demo_target['protein']['gram']
+demo_protein_cal = demo_target['protein']['calorie']
+demo_fat_gram = demo_target['fat']['gram']
+demo_fat_cal = demo_target['fat']['calorie']
+
+con.execute("""INSERT INTO target (
+        USER_ID,
+        BMR,
+        TDEE,
+        PROTEIN_GRAM,
+        PROTEIN_PER,
+        PROTEIN_CAL,
+        CARBS_GRAM,
+        CARBS_PER,
+        CARBS_CAL,
+        FAT_GRAM,
+        FAT_PER,
+        FAT_CAL
+    )
+    VALUES (
+        1,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+    )""",
+    (demo_bmr,
+    demo_tdee, 
+    demo_protein_gram, 
+    demo_proteinPercentage, 
+    demo_protein_cal,
+    demo_carbs_gram,
+    demo_carbsPercentage,
+    demo_carbs_cal,
+    demo_fat_gram,
+    demo_fatPercentage,
+    demo_fat_cal))
 
 con.commit()
 con.close()
