@@ -36,6 +36,11 @@ const createStyles = () => {
     userCard: {
       padding: 30,
     },
+    avatarContainer: {
+      backgroundColor: "red",
+      width: 100,
+      borderRadius: 50,
+    },
     name: {
       flexDirection: "row",
       alignItems: "center",

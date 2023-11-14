@@ -55,7 +55,7 @@ const ProfileScreen = () => {
   const UserCard = ({ imgSrc, name, joinTime, userTag }: UserCardType) => (
     <View style={styles.userCard}>
       {/** user avatar */}
-      <TouchableOpacity>
+      <TouchableOpacity style={styles.avatarContainer}>
         <Avatar.Image
           source={imgSrc ? { uri: imgSrc } : user.avatar}
           size={100}
