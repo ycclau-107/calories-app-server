@@ -48,7 +48,7 @@ const AppDarkTheme = {
 export default App = () => {
   // define themes
   const theme = useColorScheme();
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
   const toggleTheme = () => setIsDarkTheme(!isDarkTheme);
 
   return (
