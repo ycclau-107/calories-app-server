@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -14,12 +15,16 @@ const styles = StyleSheet.create({
     width: 300,
     overflow: "hidden",
     borderRadius: 30,
-    backgroundColor: "tomato",
+    backgroundColor: "grey",
   },
   maintext: {
     fontSize: 16,
     margin: 20,
   },
+  confirmBtn: {
+    marginTop: 10,
+  }
+
 });
 
 export default styles;
