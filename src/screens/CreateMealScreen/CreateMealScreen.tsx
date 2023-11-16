@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Button, ScrollView, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker'
-import RNPickerSelect from "react-native-picker-select";
 
 import BarcodeScanner from '../BarcodeScanner/BarcodeScannerScreen';
+import { useUserId } from '../../context/userContext';
+import { serverIP } from '../../../serverConfig';
+import axios from 'axios'
 
 const CreateMealScreen: React.FC = () => {
 
@@ -12,13 +14,14 @@ const CreateMealScreen: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   // form reponses
+  const {userId} = useUserId()
   const [selectedDate, setSelectedDate] = useState("")
   const [selectedMeal, setSelectedMeal] = useState("")
   const [selectedFood, setSelectedFood] = useState("")
-  const [selectedKcal, setSelectedKcal] = useState(0)
   const [selectedCarb, setSelectedCarb] = useState(0)
   const [selectedProt, setSelectedProt] = useState(0)
   const [selectedFat, setSelectedFat] = useState(0)
+
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
@@ -34,15 +37,6 @@ const CreateMealScreen: React.FC = () => {
             onSelectedChange={(date: React.SetStateAction<string>) => setSelectedDate(date)}
         />
 
-        <RNPickerSelect
-            onValueChange={(value) => setSelectedMeal(value)}
-            items={[
-                {label: "breakfast", value:"Breakfast"},
-                {label: "lunch", value:"Lunch"},
-                {label: "dinner", value:"Dinner"}
-            ]}
-        />
-
         <View style={{flexDirection:"row", alignItems:"center"}}>
             <Text>Food Name: </Text>
             <TextInput 
@@ -50,17 +44,6 @@ const CreateMealScreen: React.FC = () => {
                 style={{margin:10}} 
                 placeholder="Food Name" 
                 onChangeText={val => setSelectedFood(val)}
-            />
-        </View>
-
-        <View style={{flexDirection:"row", alignItems:"center"}}>
-            <Text>Calories: </Text>
-            <TextInput 
-                underlineColorAndroid='transparent' 
-                style={{margin:10}} 
-                placeholder="Kcal" 
-                keyboardType='numeric'
-                onChangeText={val => setSelectedKcal(Number(val))}
             />
         </View>
 
@@ -103,11 +86,32 @@ const CreateMealScreen: React.FC = () => {
   };
 
   const handleFormSubmit = () => {
-    // Implement logic to store data in the database
-    // You can use a state management library like Redux or send a network request
-    // For simplicity, I'm just printing the selected values to the console.
-    console.log('Form Data:', selectedOption);
-    setModalVisible(false);
+    
+    const formData = {
+      USER_ID: {userId},
+      FOOD_ITEM: selectedFood,
+      PROTEIN_GRAM: selectedProt,
+      CARBS_GRAM: selectedCarb,
+      FAT_GRAM: selectedFat
+    }
+
+    axios.post(`${serverIP}/calorie/addrecord`, formData)
+      .then((response) => {
+        console.log('Form data submitted successfully', response.data);
+
+        // reset form fields
+        setSelectedDate("");
+        setSelectedMeal("");
+        setSelectedFood("");
+        setSelectedCarb(0);
+        setSelectedProt(0);
+        setSelectedFat(0);
+
+
+      setModalVisible(false);
+    }).catch((error) =>{
+      console.error('Error submitting form data: ', error)
+    })
   };
 
   return (

@@ -20,7 +20,9 @@ import {
 // import navigation provider
 import "react-native-gesture-handler";
 import Router from "./src/navigation/Router";
+import { UserIdProvider } from "./src/context/userContext";
 
+UserIdProvider
 // create themes
 const AppDefaultTheme = {
   ...PaperDefaultTheme,
@@ -54,11 +56,13 @@ export default App = () => {
   return (
     <ThemeContext.Provider value={{ isDarkTheme, toggleTheme }}>
       <PaperProvider theme={isDarkTheme ? AppDarkTheme : AppDefaultTheme}>
-        <NavigationContainer
-          theme={isDarkTheme ? AppDarkTheme : AppDefaultTheme}
-        >
-          <Router />
-        </NavigationContainer>
+        <UserIdProvider>
+          <NavigationContainer
+            theme={isDarkTheme ? AppDarkTheme : AppDefaultTheme}
+          >
+            <Router />
+          </NavigationContainer>
+        </UserIdProvider>
       </PaperProvider>
     </ThemeContext.Provider>
   );

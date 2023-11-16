@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
+import { useUserId } from '../../context/userContext';
 
 import {serverIP} from "../../../serverConfig";
 
@@ -22,6 +23,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 const LoginScreen = ({ navigation }:any) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const {userId, setUserId } = useUserId()
+
+    useEffect(() => {
+      // This useEffect will run every time userId changes
+      console.log("Updated userId:", userId);
+    }, [userId]);
 
     const handleLogin = () => {
         axios.get(serverIP + '/profile/get',{
@@ -36,6 +43,8 @@ const LoginScreen = ({ navigation }:any) => {
             } else{
                 console.log("Login success:", data);
                 // FIXME: part of navigation
+                setUserId(data.userid)
+                console.log(userId)
                 
                 navigation.navigate('Home');
             }
@@ -47,7 +56,7 @@ const LoginScreen = ({ navigation }:any) => {
 
     return (
         <View style={styles.container}>
-            <Image style={styles.image} source={require("../../assets/icon.png")} /> 
+            <Image style={styles.image} source={require("../../../assets/icon.png")} /> 
             <StatusBar style="auto" />
             <View style={styles.inputView}>
                 <TextInput

@@ -11,6 +11,7 @@ import Icon from "@expo/vector-icons/MaterialIcons";
 
 // import bottom tab navigator
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import LoginScreen from "../../screens/LoginScreen/LoginScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,7 +20,7 @@ const HomeTabNavigator = () => {
     <Tab.Navigator>
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={LoginScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" color={color} size={size} />
