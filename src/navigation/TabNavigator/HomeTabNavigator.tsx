@@ -2,8 +2,9 @@ import * as React from "react";
 
 // import stack navigators
 import HomeScreen from "../../screens/HomeScreen";
-import BarcodeScanner from "../../screens/BarcodeScanner";
+import BarcodeScanner from "../../screens/BarcodeScanner/BarcodeScannerScreen";
 import ProfileScreen from "../../screens/ProfileScreen";
+import CreateMealScreen from "../../screens/CreateMealScreen/CreateMealScreen";
 
 // import icon library
 import Icon from "@expo/vector-icons/MaterialIcons";
@@ -28,11 +29,11 @@ const HomeTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Camera"
-        component={BarcodeScanner}
+        name="Meals"
+        component={CreateMealScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="camera" color={color} size={size} />
+            <Icon name="fastfood" color={color} size={size} />
           ),
           tabBarShowLabel: false,
           headerShown: true,
