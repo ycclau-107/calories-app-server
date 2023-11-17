@@ -14,7 +14,7 @@ const CreateMealScreen: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   // form reponses
-  const {userId} = useUserId()
+  const userId = useUserId().userId
   const [selectedDate, setSelectedDate] = useState("")
   const [selectedMeal, setSelectedMeal] = useState("")
   const [selectedFood, setSelectedFood] = useState("")
@@ -24,8 +24,8 @@ const CreateMealScreen: React.FC = () => {
 
 
   const handleOptionSelect = (option: string) => {
-    setSelectedOption(option);
     setModalVisible(false);
+    setSelectedOption(option);
   };
 
   const renderForm = () => {
@@ -80,15 +80,26 @@ const CreateMealScreen: React.FC = () => {
             />
         </View>
 
-        <Button title="Submit" onPress={() => handleFormSubmit()} />
+        {(selectedDate !== "" && selectedFood !== "") ?
+          <Button title="Submit" onPress={() => handleFormSubmit()} /> : <Text style={{color: "red"}}>Complete all fields</Text>}
+        <Button title="Cancel" onPress={handleFormCancel} />
+  
       </ScrollView>
     );
   };
 
+  const handleFormCancel = () => {
+    setModalVisible(false);
+    setSelectedOption(null)
+  }
+
   const handleFormSubmit = () => {
+
+    console.log(selectedDate)
     
     const formData = {
-      user_id: {userId},
+      user_id: 1,
+      record_date: selectedDate,
       food_item: selectedFood,
       cal_get: selectedCarb*4 + selectedProt*4 + selectedFat*9,
       protein_gram: selectedProt,
@@ -96,23 +107,25 @@ const CreateMealScreen: React.FC = () => {
       fat_gram: selectedFat
     }
 
+    console.log(formData)
+
     axios.post(`${serverIP}/calorie/addrecord`, formData)
       .then((response) => {
         console.log('Form data submitted successfully', response.data);
 
         // reset form fields
-        setSelectedDate("");
-        setSelectedMeal("");
-        setSelectedFood("");
-        setSelectedCarb(0);
-        setSelectedProt(0);
-        setSelectedFat(0);
+        setSelectedDate("")
+        setSelectedMeal("")
+        setSelectedFood("")
+        setSelectedCarb(0)
+        setSelectedProt(0)
+        setSelectedFat(0)
 
-
-      setModalVisible(false);
     }).catch((error) =>{
       console.error('Error submitting form data: ', error)
     })
+    setModalVisible(false)
+    setSelectedOption(null)
   };
 
   return (
