@@ -88,11 +88,12 @@ const CreateMealScreen: React.FC = () => {
   const handleFormSubmit = () => {
     
     const formData = {
-      USER_ID: {userId},
-      FOOD_ITEM: selectedFood,
-      PROTEIN_GRAM: selectedProt,
-      CARBS_GRAM: selectedCarb,
-      FAT_GRAM: selectedFat
+      user_id: {userId},
+      food_item: selectedFood,
+      cal_get: selectedCarb*4 + selectedProt*4 + selectedFat*9,
+      protein_gram: selectedProt,
+      carbs_gram: selectedCarb,
+      fat_gram: selectedFat
     }
 
     axios.post(`${serverIP}/calorie/addrecord`, formData)
