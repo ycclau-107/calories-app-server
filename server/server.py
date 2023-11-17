@@ -144,15 +144,18 @@ def target_get():
 @app.route('/calorie/addrecord', methods = ['POST'])
 def calorie_addrecord():
     user_id = request.args.get('user_id','')
-    protein_gram = request.args.get('protein_gram,','')
-    carbs_gram = request.args.get('carbs_gram,','')
-    fat_gram = request.args.get('fat_gram,','')
+    record_date = request.args.get('record_date')
+    food_item = request.args.get('food_item', '')
+    calories = request.args.get('cal_get','')
+    protein_gram = request.args.get('protein_gram','')
+    carbs_gram = request.args.get('carbs_gram','')
+    fat_gram = request.args.get('fat_gram','')
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
-        """INSERT INTO calorie_record (USER_ID, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
+         """INSERT INTO calorie_record (USER_ID, RECORD_DATE, FOOD_ITEM< CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
         VALUES (?, ?, ?, ?)""",
-        (user_id, protein_gram, carbs_gram, fat_gram)
+        (user_id, record_date, food_item, calories, protein_gram, carbs_gram, fat_gram)
     )
     con.commit()
     con.close()

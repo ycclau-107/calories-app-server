@@ -37,10 +37,11 @@ con.execute("""CREATE TABLE IF NOT EXISTS target (
     );""")
 
 #create calorie record table
-con.execute("""CREATE TABLE IF NOT EXISTS calorie (
+con.execute("""CREATE TABLE IF NOT EXISTS calorie_record (
             C_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             RECORD_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             USER_ID INTEGER NOT NULL,
+            FOOD_ITEM TEXT,
             CALORIES INTEGER NOT NULL,
             PROTEIN_GRAM INTEGER,
             CARBS_GRAM INTEGER,
@@ -154,6 +155,26 @@ con.execute("""INSERT INTO target (
     demo_fat_gram,
     demo_fatPercentage,
     demo_fat_cal))
+
+con.execute(
+    """INSERT INTO calorie_record(
+        USER_ID, 
+        RECORD_DATE,
+        FOOD_ITEM,
+        CALORIES, 
+        PROTEIN_GRAM, 
+        CARBS_GRAM, 
+        FAT_GRAM
+    ) 
+    VALUES 
+        (1, "2023-11-17", "Cheese", 402.2, 1.3, 25, 33), 
+        (1, "2023-11-17", "Cocoa Powder", 306, 25, 20, 14),
+        (1, "2023-11-17", "Cesar Salad", 354, 14, 7, 30),
+        (1, "2023-11-16", "Oyster", 201, 12, 9, 13),
+        (1, "2023-11-15", "Egg Tart", 382.06, 52.06, 7.77, 15.86),
+        (1, "2023-11-14", "Chia seeds", 379, 8, 17, 31),
+        (1, "2023-11-14", "Bacon", 404.6, 0.4, 13, 39)"""
+    )
 
 con.commit()
 con.close()
