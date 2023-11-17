@@ -1,6 +1,6 @@
 
 export interface profile{
-    id: number;
+    user_id: number;
     name: string;
     //weight of user in kg
     weight: number;
@@ -17,9 +17,9 @@ export interface profile{
  * target profile
  * @bmr Basal metabolic rate
  * @tdee Total Daily Energy Expenditure
- * @main_nutritunion 
  */
 export interface target{
+    user_id: number,
     bmr: number,
     tdee: number,
     protein:{
@@ -37,6 +37,23 @@ export interface target{
         gram: number,
         calorie: number,
     },
+}
+
+export interface nutritionLabal{
+    foodname: string,
+    calorie_100g: number,
+    protein_100g: number,
+    carbs_100g: number,
+    fat_100g: number,
+}
+
+export interface calorieRecord{
+    foodname: string,
+    gram: number,
+    calorie: number,
+    protein: number,
+    carbs: number,
+    fat: number
 }
 
 /**
@@ -127,6 +144,7 @@ export function setTarget(
     fatPer = 1 - proteinPer - carbsPer;
 
     var target: target= {
+        user_id: profile.user_id,
         bmr: bmr,
         tdee: tdee,
         protein:{
@@ -147,4 +165,22 @@ export function setTarget(
     }
 
     return target;
+}
+
+/**
+ * function to calcuate the food of total calorie and nutrition for calorie record
+ * @param nutLabel 
+ * @param gram 
+ * @return {calorieRecord} calorieRecord
+ */
+export function calTotalNutrition(nutLabel: nutritionLabal, gram: number): calorieRecord{
+    var outdata = {
+        foodname: nutLabel.foodname,
+        gram: gram,
+        calorie: nutLabel.calorie_100g * gram,
+        protein: nutLabel.protein_100g * gram,
+        carbs: nutLabel.carbs_100g * gram,
+        fat: nutLabel.fat_100g * gram
+    }
+    return outdata;
 }
