@@ -14,6 +14,15 @@ dependencies:
   '@expo/webpack-config':
     specifier: ^19.0.0
     version: 19.0.0(expo@49.0.16)
+  '@react-native-community/datetimepicker':
+    specifier: 7.2.0
+    version: 7.2.0
+  '@react-native-community/picker':
+    specifier: ^1.8.1
+    version: 1.8.1(react-native@0.72.6)(react@18.2.0)
+  '@react-native-picker/picker':
+    specifier: 2.4.10
+    version: 2.4.10(react-native@0.72.6)(react@18.2.0)
   '@react-navigation/bottom-tabs':
     specifier: ^6.5.11
     version: 6.5.11(@react-navigation/native@6.1.9)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
@@ -50,18 +59,36 @@ dependencies:
   react-native:
     specifier: ^0.72.6
     version: 0.72.6(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
+  react-native-date-picker:
+    specifier: ^4.3.3
+    version: 4.3.3(react-native@0.72.6)(react@18.2.0)
+  react-native-datepicker:
+    specifier: ^1.7.2
+    version: 1.7.2
   react-native-dotenv:
     specifier: ^3.4.9
     version: 3.4.9(@babel/runtime@7.23.2)
+  react-native-dropdown-select-list:
+    specifier: ^2.0.5
+    version: 2.0.5
   react-native-fs:
     specifier: ^2.20.0
     version: 2.20.0(react-native@0.72.6)
   react-native-gesture-handler:
     specifier: ~2.12.0
     version: 2.12.1(react-native@0.72.6)(react@18.2.0)
+  react-native-modern-datepicker:
+    specifier: 1.0.0-beta.91
+    version: 1.0.0-beta.91(react-native@0.72.6)
   react-native-paper:
     specifier: ^5.11.1
     version: 5.11.1(react-native-safe-area-context@4.6.3)(react-native-vector-icons@10.0.2)(react-native@0.72.6)(react@18.2.0)
+  react-native-picker:
+    specifier: ^4.3.7
+    version: 4.3.7
+  react-native-picker-select:
+    specifier: ^9.0.0
+    version: 9.0.0(@react-native-picker/picker@2.4.10)
   react-native-safe-area-context:
     specifier: 4.6.3
     version: 4.6.3(react-native@0.72.6)(react@18.2.0)
@@ -91,6 +118,9 @@ devDependencies:
   '@types/react-native':
     specifier: ^0.72.6
     version: 0.72.6(react-native@0.72.6)
+  '@types/react-native-modern-datepicker':
+    specifier: ^1.0.4
+    version: 1.0.4
   '@types/react-native-vector-icons':
     specifier: ^6.4.17
     version: 6.4.17
@@ -2326,6 +2356,33 @@ packages:
       - supports-color
       - utf-8-validate
 
+  /@react-native-community/datetimepicker@7.2.0:
+    resolution: {integrity: sha512-dO1sQy83M/EvnHE2egto05iwXZX7EYn5f/VDMp6afZFRFXRiRo7CzB3VFg4B55gJRJMNBv06NYMLPM3SlpnEGQ==}
+    dependencies:
+      invariant: 2.2.4
+    dev: false
+
+  /@react-native-community/picker@1.8.1(react-native@0.72.6)(react@18.2.0):
+    resolution: {integrity: sha512-Sj9DzX1CSnmYiuEQ5fQhExoo4XjSKoZkqLPAAybycq6RHtCuWppf+eJXRMCOJki25BlKSSt+qVqg0fIe//ujNQ==}
+    deprecated: 'this library has been renamed to @react-native-picker/picker. See the GitHub new repository: https://github.com/react-native-picker/picker'
+    peerDependencies:
+      react: ^16.0
+      react-native: '>=0.57'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.72.6(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
+    dev: false
+
+  /@react-native-picker/picker@2.4.10(react-native@0.72.6)(react@18.2.0):
+    resolution: {integrity: sha512-EvAlHmPEPOwvbP6Pjg/gtDV3XJzIjIxr10fXFNlX5r9HeHw582G1Zt2o8FLyB718nOttgj8HYUTGxvhu4N65sQ==}
+    peerDependencies:
+      react: '>=16'
+      react-native: '>=0.57'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.72.6(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
+    dev: false
+
   /@react-native/assets-registry@0.72.0:
     resolution: {integrity: sha512-Im93xRJuHHxb1wniGhBMsxLwcfzdYreSZVQGDoMJgkd6+Iky61LInGEHnQCTN0fKNYF1Dvcofb4uMmE1RQHXHQ==}
 
@@ -2687,6 +2744,12 @@ packages:
   /@types/range-parser@1.2.7:
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
     dev: false
+
+  /@types/react-native-modern-datepicker@1.0.4:
+    resolution: {integrity: sha512-edAsB/epupq/MdnNrBnpIKi8AuSjV82TJ1ietJFRDy62KUHmPmJj4m6nzsAkIfSUT46KjAXL4jY/CMZsbAuo4g==}
+    dependencies:
+      '@types/react': 18.2.35
+    dev: true
 
   /@types/react-native-vector-icons@6.4.17:
     resolution: {integrity: sha512-pE5vmuKA9BgbrWmri+LVLYmhwLCJ1gKerpXU6qrXFehLqY/sJv1VdvkUul9UaVseKJ3XhhG2LWg3kF1xQD2EGA==}
@@ -5763,6 +5826,10 @@ packages:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
 
+  /jalaali-js@1.2.6:
+    resolution: {integrity: sha512-io974va+Qyu+UfuVX3UIAgJlxLhAMx9Y8VMfh+IG00Js7hXQo1qNQuwSiSa0xxco0SVgx5HWNkaiCcV+aZ8WPw==}
+    dev: false
+
   /jest-diff@29.7.0:
     resolution: {integrity: sha512-LMIgiIrhigmPrs03JHpxUh2yISK3vLFPkAodPeo0+BuF7wA2FoQbkEg1u8gBYBThncu7e1oEDUfIXVuTqLRUjw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -6165,6 +6232,10 @@ packages:
 
   /lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+
+  /lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    dev: false
 
   /lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -6947,6 +7018,25 @@ packages:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
     hasBin: true
+    dev: false
+
+  /moment-jalaali@0.9.6:
+    resolution: {integrity: sha512-v8wXjQplvk5ez+sUqgsWIrafwIf1BEXXvzTYwsg1wHcqh27nSgKPCJ6FnZRrCz03MoNyB9N31L0oms+vE8Rq7g==}
+    dependencies:
+      jalaali-js: 1.2.6
+      moment: 2.29.4
+      moment-timezone: 0.5.43
+      rimraf: 3.0.2
+    dev: false
+
+  /moment-timezone@0.5.43:
+    resolution: {integrity: sha512-72j3aNyuIsDxdF1i7CEgV2FfxM1r6aaqJyLB2vwb33mXYyoyLly+F1zbWqhA3/bVIoJ4szlUoMbUnVdid32NUQ==}
+    dependencies:
+      moment: 2.29.4
+    dev: false
+
+  /moment@2.29.4:
+    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
     dev: false
 
   /ms@2.0.0:
@@ -8081,6 +8171,22 @@ packages:
   /react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
 
+  /react-native-date-picker@4.3.3(react-native@0.72.6)(react@18.2.0):
+    resolution: {integrity: sha512-Lq2hGZkwoyCMsxi/uw4KVGu4/xdPZ8AHEx2SU5KY2mipHFpX+r4n5/gXa+rpCRkARJaTFYPZ7S59bT9KMh7fGw==}
+    peerDependencies:
+      react: '>= 17.0.1'
+      react-native: '>= 0.64.3'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.72.6(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
+    dev: false
+
+  /react-native-datepicker@1.7.2:
+    resolution: {integrity: sha512-ses0N1y44fYBmlejYwR2i+dGnQQ8v5/gacX2CrbFJiWxbcQaRuxexsZPB9YQuQkAy+uKz5Gti3Lrp3dh9BfkzA==}
+    dependencies:
+      moment: 2.29.4
+    dev: false
+
   /react-native-dotenv@3.4.9(@babel/runtime@7.23.2):
     resolution: {integrity: sha512-dbyd+mcy7SUzxEgmt33TRf1FGcNe6swJhXmB0unKkI49F7+pidog9kPtjxMLTAfmKA8gcN2XHQSKltGfGbGCLQ==}
     peerDependencies:
@@ -8088,6 +8194,10 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.2
       dotenv: 16.3.1
+    dev: false
+
+  /react-native-dropdown-select-list@2.0.5:
+    resolution: {integrity: sha512-TepbcagQVUMB6nLuIlVU2ghRpQHAECOeZWe8K04ymW6NqbKbxuczZSDFfdCiABiiQ2dFD+8Dz65y4K7/uUEqGg==}
     dev: false
 
   /react-native-fs@2.20.0(react-native@0.72.6):
@@ -8119,6 +8229,16 @@ packages:
       react-native: 0.72.6(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
     dev: false
 
+  /react-native-modern-datepicker@1.0.0-beta.91(react-native@0.72.6):
+    resolution: {integrity: sha512-tyyS6iswwxn/CWIgk9j82X5/9gkgAQuI4fiWa+TEWjOo1WIhBr0x7914mtagrVuVgJCMRnHCopCIWL78afakHw==}
+    peerDependencies:
+      react-native: '>=0.59'
+    dependencies:
+      moment-jalaali: 0.9.6
+      prop-types: 15.8.1
+      react-native: 0.72.6(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
+    dev: false
+
   /react-native-paper@5.11.1(react-native-safe-area-context@4.6.3)(react-native-vector-icons@10.0.2)(react-native@0.72.6)(react@18.2.0):
     resolution: {integrity: sha512-axqRTagGL8LtuYh172cx2Q2THOVJ3PTpPjCKhL5ECRdpJs2ceiboVecSiOIBuO3H7dVpaneptBA0vJr9HeVHwg==}
     peerDependencies:
@@ -8134,6 +8254,19 @@ packages:
       react-native-safe-area-context: 4.6.3(react-native@0.72.6)(react@18.2.0)
       react-native-vector-icons: 10.0.2
       use-latest-callback: 0.1.7(react@18.2.0)
+    dev: false
+
+  /react-native-picker-select@9.0.0(@react-native-picker/picker@2.4.10):
+    resolution: {integrity: sha512-jkG3gpp2oGMSXSBt5zu76Yp5JNzkF1K8BaKH7erf9Q5oTFI80lozsGMc9FkJokzxuy5+jHRCX+pHHBhtl0SI+A==}
+    peerDependencies:
+      '@react-native-picker/picker': ^2.4.0
+    dependencies:
+      '@react-native-picker/picker': 2.4.10(react-native@0.72.6)(react@18.2.0)
+      lodash.isequal: 4.5.0
+    dev: false
+
+  /react-native-picker@4.3.7:
+    resolution: {integrity: sha512-bqY0FOsgNe/svnlV7CTvDKjqca5iZr0E0h4gYO8LDh9alxGK7P6bTvqSx6VwDR144moHAG7dsKGrSH2r8bTx2Q==}
     dev: false
 
   /react-native-safe-area-context@4.6.3(react-native@0.72.6)(react@18.2.0):
