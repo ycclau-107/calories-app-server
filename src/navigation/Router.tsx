@@ -4,26 +4,23 @@ import React from "react";
 import HomeTabNavigator from "./TabNavigator/HomeTabNavigator";
 
 // import screens
-import HomeScreen from "../screens/HomeScreen";
+import HomeScreen from "../screens/HomeScreen/HomeScreen";
 
 // import main stack creator
 import { createStackNavigator } from "@react-navigation/stack";
+import LoginScreen from "../screens/LoginScreen/LoginScreen";
+import HomeStackNavigator from "./StackNavigator/HomeStackNavigator";
+import { NavigationContainer } from "@react-navigation/native";
 
+const Stack = createStackNavigator();
 
-const MainStack = () => {
-  const Stack = createStackNavigator();
-
+const Router = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name={"HomeTab"}
-        component={HomeTabNavigator}
-        options={{
-          headerShown: false,
-        }}
-      />
+    <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Home" component={HomeTabNavigator} />
     </Stack.Navigator>
   );
 };
 
-export default MainStack;
+export default Router;

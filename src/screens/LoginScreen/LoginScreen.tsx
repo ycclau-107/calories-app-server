@@ -16,9 +16,10 @@ import {serverIP} from "../../../serverConfig";
 
 //FIXME: navigation part
 import Router from "../../navigation/Router";
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
+import HomeStackNavigator from "../../navigation/StackNavigator/HomeStackNavigator";
+import HomeScreen from "../HomeScreen/HomeScreen";
+import HomeTabNavigator from "../../navigation/TabNavigator/HomeTabNavigator";
 
 const LoginScreen = ({ navigation }:any) => {
     const [username, setUsername] = useState("");
@@ -45,7 +46,7 @@ const LoginScreen = ({ navigation }:any) => {
                 // FIXME: part of navigation
                 setUserId(data.userid)
                 
-                navigation.navigate('Home');
+                navigation.navigate('Home', {screen: 'Home'});
             }
         }).catch((error:any) => {
             console.log("Login error:", error);

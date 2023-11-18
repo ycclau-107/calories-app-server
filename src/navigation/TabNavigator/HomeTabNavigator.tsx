@@ -1,7 +1,7 @@
 import * as React from "react";
 
 // import stack navigators
-import HomeScreen from "../../screens/HomeScreen";
+import HomeScreen from "../../screens/HomeScreen/HomeScreen";
 import BarcodeScanner from "../../screens/BarcodeScanner/BarcodeScannerScreen";
 import ProfileScreen from "../../screens/ProfileScreen";
 import CreateMealScreen from "../../screens/CreateMealScreen/CreateMealScreen";
@@ -12,15 +12,17 @@ import Icon from "@expo/vector-icons/MaterialIcons";
 // import bottom tab navigator
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import LoginScreen from "../../screens/LoginScreen/LoginScreen";
+import HomeStackNavigator from "../StackNavigator/HomeStackNavigator";
 
 const Tab = createBottomTabNavigator();
 
 const HomeTabNavigator = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+    initialRouteName="Home">
       <Tab.Screen
         name="Home"
-        component={LoginScreen}
+        component={HomeScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" color={color} size={size} />

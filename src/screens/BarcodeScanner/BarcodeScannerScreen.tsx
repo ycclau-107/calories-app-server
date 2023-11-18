@@ -1,10 +1,7 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
 import { Text, View, Button, Modal, TextInput } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import CreateMealScreen from "../CreateMealScreen/CreateMealScreen";
 import styles from "./styles";
-import { calorieRecord } from "@/calculation/calculation";
 import { useUserId } from '../../context/userContext';
 import DatePicker from 'react-native-modern-datepicker'
 import axios from "axios";
@@ -29,10 +26,9 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ setSelectedOption }) =>
 
   const userId = useUserId().userId
 
-  const [hasPermission, setHasPermission] = useState<boolean>(false);
+  const [hasPermission, setHasPermission] = useState<null | boolean>(null);
   const [scanned, setScanned] = useState(false)
   const [text, setText] = useState("Not yet scanned")
-  const [foodNutrient, setFoodNutrient] = useState([])
   const [foodName, setFoodName] = useState("")
   const [foodKcal, setFoodKcal] = useState(0)
   const [foodCarbs, setFoodCarbs] = useState(0)
@@ -47,11 +43,10 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ setSelectedOption }) =>
   const askForCameraPermission = () => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  };
+      setHasPermission(status === 'granted');
+    })()
+  }
 
-  // ask for camera permission
   useEffect(() => {
     askForCameraPermission();
   }, []);
@@ -89,7 +84,6 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ setSelectedOption }) =>
       try {
         // Updates state w API response
         setHasData(true);
-        setFoodNutrient(result.data[0]);
         setFoodName(result.data[0].display_name_translations.en);
         setFoodKcal(result.data[0].nutrients.energy_calories_kcal.per_portion || 0)
         setFoodCarbs(result.data[0].nutrients.carbohydrates.per_portion || 0)
@@ -167,78 +161,73 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ setSelectedOption }) =>
 
   if (hasPermission === false) {
     return (
-      <View style={styles.container}>
+      <Modal style={styles.container}>
+        <View style={styles.nopermission}>
         <Text style={{ margin: 10 }}>No access to camera</Text>
         <Button
           title={"Allow Camera"}
           onPress={() => askForCameraPermission()}
         />
-      </View>
-    );
-  }
-
-  if (hasPermission === true) {
-    return (
-      <Modal style={{...styles.container, width:'80%'}} transparent={true}>
-        {confirmBarcode? 
-        <View style={styles.modalContent}>
-          <Text>{foodName}</Text>
-          <DatePicker 
-            mode='calendar' 
-            onSelectedChange={(date: React.SetStateAction<string>) => setDate(date)}
-          />
-          <Text>Portion: </Text>
-          <TextInput
-            value={portion.toString()}
-            onChangeText={(text) => setPortion(Number(text))}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-          <Text>Calories (kCal per portion): {foodKcal}</Text>
-          <Text>Carbs (g per portion): {foodCarbs}</Text>
-          <Text>Protein (g per portion): {foodPro}</Text>
-          <Text>Fat (g perportion): {foodFat}</Text>
-          {date !== "" ?
-          <Button title="Save" onPress={() => handleSave()} /> : <Text style={{color: "red"}}>Choose Date</Text>}
-          <Button title="Cancel" onPress={handleReturn}/>
-        </View>:
-        <View style={styles.modalContent}>
-          <View style={styles.barcodebox}>
-            <BarCodeScanner
-              onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-              style={{ height: 400, width: 400 }}
-            />
-          </View>
-          <Text style={styles.maintext}>{text}</Text>
-          <Text style={styles.maintext}>{foodName}</Text>
-
-          {scanned && (
-            <View>
-              <Button title={"Scan again?"} onPress={() => setScanned(false)} color="tomato"/>
-            </View>
-          )}
-
-          {hasData && (
-            <View style={styles.confirmBtn}>
-              <Button title={"Confirm"} onPress={handleConfirm}/>
-            </View>
-          )}
-
-          <View style={styles.cancelBtn}>
-            <Button title={"Cancel"} onPress={handleCancel}/>
-          </View>
-
         </View>
-        }
       </Modal>
     );
   }
 
+  if (hasPermission === true){
   return (
-    <View>
-      <Text>Granted</Text>
-    </View>
-  );
+    <Modal style={{...styles.container, width:'80%'}} transparent={true}>
+      {confirmBarcode? 
+      <View style={styles.modalContent}>
+        <Text>{foodName}</Text>
+        <DatePicker 
+          mode='calendar' 
+          onSelectedChange={(date: React.SetStateAction<string>) => setDate(date)}
+        />
+        <Text>Portion: </Text>
+        <TextInput
+          value={portion.toString()}
+          onChangeText={(text) => setPortion(Number(text))}
+          keyboardType="numeric"
+          style={styles.input}
+        />
+        <Text>Calories (kCal per portion): {foodKcal}</Text>
+        <Text>Carbs (g per portion): {foodCarbs}</Text>
+        <Text>Protein (g per portion): {foodPro}</Text>
+        <Text>Fat (g perportion): {foodFat}</Text>
+        {date !== "" ?
+        <Button title="Save" onPress={() => handleSave()} /> : <Text style={{color: "red"}}>Choose Date</Text>}
+        <Button title="Cancel" onPress={handleReturn}/>
+      </View>:
+      <View style={styles.modalContent}>
+        <View style={styles.barcodebox}>
+          <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={{ height: 400, width: 400 }}
+          />
+        </View>
+        <Text style={styles.maintext}>{text}</Text>
+        <Text style={styles.maintext}>{foodName}</Text>
+
+        {scanned && (
+          <View>
+            <Button title={"Scan again?"} onPress={() => setScanned(false)} color="tomato"/>
+          </View>
+        )}
+
+        {hasData && (
+          <View style={styles.confirmBtn}>
+            <Button title={"Confirm"} onPress={handleConfirm}/>
+          </View>
+        )}
+
+        <View style={styles.cancelBtn}>
+          <Button title={"Cancel"} onPress={handleCancel}/>
+        </View>
+
+      </View>
+      }
+    </Modal>
+  );}
 };
 
 export default BarcodeScanner;

@@ -228,6 +228,30 @@ def editRecord():
 
     return records
 
+# delete food item from database
+@app.route('/calorie/delRecord', methods = ['DELETE'])
+def delRecord():
+    try:
+        user_id = request.args.get('user_id')
+        record_date = request.args.get('record_date')
+        food_item = request.args.get('food_item')
+
+        if not user_id or not record_date or not food_item:
+            return jsonify({'error': 'Missing required parameters'}), 400
+
+        con = sqlite3.connect('calories-db.db')
+        cursor = con.execute(
+            """DELETE FROM calorie_record
+            WHERE USER_ID = ? AND RECORD_DATE = ? AND FOOD_ITEM = ?""",
+            (user_id, record_date, food_item))
+
+        con.commit()
+        con.close()
+
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 #http://10.68.166.107:5000/calories/get/dailyreport?user_id=1
 @app.route('/calories/get/dailyreport',methods = ['GET'])

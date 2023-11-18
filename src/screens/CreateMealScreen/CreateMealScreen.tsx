@@ -34,9 +34,6 @@ const CreateMealScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  // choose to enter meal with barcode or manually
-  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
-
   // form reponses
   const userId = useUserId().userId
   const [selectedDate, setSelectedDate] = useState("")
@@ -53,10 +50,12 @@ const CreateMealScreen: React.FC = () => {
   const [editDate, setEditDate] = useState("")
   const [editMode, setEditMode] = useState(false)
   const [editedData, setEditedData] = useState<FoodRecord[]>([])
+  const [deleted, setDeleted] = useState(false)
 
   // get meal records from database
   // updates every time after new entry recorded in db
   useEffect(() => {
+    setEditMode(false)
     axios.get(serverIP + '/calorie/getrecord', {
       params: {
         user_id: userId,
@@ -73,11 +72,11 @@ const CreateMealScreen: React.FC = () => {
   const handleOptionSelect = (option: string) => {
     setModalVisible(false);
     setSelectedOption(option);
-
-    if (option === 'barcode') {
-      setShowBarcodeScanner(true);
-    }
   };
+
+  useEffect(() => {
+    onItemClick(editDate)
+  }, [deleted])
 
   const renderForm = () => {
     // Form for manual entry of nutrients
@@ -227,6 +226,20 @@ const CreateMealScreen: React.FC = () => {
     setLoad(!load)
   };
 
+  const handleDelete = (foodItem: string) =>{
+    axios.delete(serverIP + '/calorie/delRecord', {
+      params: {
+        'user_id': userId,
+        'record_date': editDate,
+        'food_item': foodItem
+      }
+    }).catch(error => {
+      console.log("Error making DELETE request: ", error)
+    })
+    setLoad(!load)
+    setDeleted(!deleted)
+  }
+
   return (
     <View style={styles.container}>
       {/* Meal Feed Main Content */}
@@ -251,10 +264,10 @@ const CreateMealScreen: React.FC = () => {
       </View>
 
       {editMode === true ? (
-        <Modal>
+        <Modal visible={editMode}>
           <Text>{editDate}</Text>
           {editedData.length < 1?
-          <ActivityIndicator size={"large"} color={"#2FBBF0"}/>:
+          <ActivityIndicator size={"large"} color={"#2FFFF0"}/>:
           <FlatList
             data={editedData}
             keyExtractor={(_, index) => index.toString()}
@@ -293,6 +306,8 @@ const CreateMealScreen: React.FC = () => {
                   keyboardType="numeric"
                   style={styles.input}
                 />
+
+                <Button title="Delete food" onPress={() => handleDelete(editedData[index].FOOD_ITEM)}></Button>
               </View>
             )
             }

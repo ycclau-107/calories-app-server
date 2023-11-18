@@ -40,6 +40,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
+  nopermission: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  }
 
 });
 
