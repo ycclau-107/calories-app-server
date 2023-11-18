@@ -44,7 +44,6 @@ const LoginScreen = ({ navigation }:any) => {
                 console.log("Login success:", data);
                 // FIXME: part of navigation
                 setUserId(data.userid)
-                console.log(userId)
                 
                 navigation.navigate('Home');
             }

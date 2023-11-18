@@ -164,6 +164,71 @@ def calorie_addrecord():
     con.close()
     return {"result": "calorie record added" + food_item}
 
+@app.route('/calorie/getrecord', methods = ['GET'])
+def getRecord():
+    user_id = request.args.get('user_id')
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute(
+        """SELECT RECORD_DATE, group_concat(FOOD_ITEM), sum(CALORIES), sum(CARBS_GRAM), sum(PROTEIN_GRAM), sum(FAT_GRAM) FROM calorie_record
+        WHERE USER_ID = ?
+        GROUP BY RECORD_DATE
+        ORDER BY RECORD_DATE DESC""",
+        (user_id))
+    
+    records = [dict((cursor.description[i][0], value) \
+                    for i, value in enumerate(row)) for row in cursor.fetchall()]
+    
+    records = jsonify(records)
+
+    con.commit()
+    con.close()
+
+    return records
+
+# update record
+@app.route('/calorie/changerecord', methods = ['PUT'])
+def changeRecord():
+    values = request.json.get('values')
+    print(values)
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.cursor()
+    query = """INSERT OR REPLACE INTO calorie_record (USER_ID, RECORD_DATE, CALORIES, CARBS_GRAM, PROTEIN_GRAM, FOOD_ITEM, FAT_GRAM)
+    VALUES (?, ?, ?, ?, ?, ?, ?)"""
+
+    try:
+        for row in values:
+            cursor.execute(query, row)
+    except Exception as e:
+        print(f"Error: {e}")
+
+    con.commit()
+    con.close()
+
+# get records from given day and user
+@app.route('/calorie/editRecord', methods = ['GET'])
+def editRecord():
+    user_id = request.args.get('user_id')
+    record_date = request.args.get('record_date')
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute(
+        """SELECT FOOD_ITEM, CALORIES, CARBS_GRAM, PROTEIN_GRAM, FAT_GRAM FROM calorie_record
+        WHERE USER_ID = ? AND RECORD_DATE = ?""",
+        (user_id, record_date))
+    
+    records = [dict((cursor.description[i][0], value) \
+                    for i, value in enumerate(row)) for row in cursor.fetchall()]
+    
+    records = jsonify(records)
+
+    con.commit()
+    con.close()
+
+    return records
+
+
 #http://10.68.166.107:5000/calories/get/dailyreport?user_id=1
 @app.route('/calories/get/dailyreport',methods = ['GET'])
 def calorie_report():
@@ -181,7 +246,7 @@ def calorie_report():
     row_t = cursor_t.fetchone()
 
     cursor_r = con.execute("""
-    SELECT SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calorie
+    SELECT SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calorie_record
     WHERE USER_ID = ? 
     AND RECORD_DATE = DATE('now')""",
     (user_id,))

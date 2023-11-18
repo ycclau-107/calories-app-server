@@ -1,17 +1,48 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
-import { Text, View, Button } from "react-native";
+import { Text, View, Button, Modal, TextInput } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import styles from "./styles";
 import CreateMealScreen from "../CreateMealScreen/CreateMealScreen";
+import styles from "./styles";
+import { calorieRecord } from "@/calculation/calculation";
+import { useUserId } from '../../context/userContext';
+import DatePicker from 'react-native-modern-datepicker'
+import axios from "axios";
+import { serverIP } from "../../../serverConfig";
 
-const BarcodeScanner = () => {
+interface BarcodeScannerProps {
+  setSelectedOption: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+interface CalorieRecord {
+  'user_id': number;
+  'record_date': string;
+  'food_item': string;
+  'cal_get': number;
+  'protein_gram': number;
+  'carbs_gram': number;
+  'fat_gram': number
+}
+
+
+const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ setSelectedOption }) => {
+
+  const userId = useUserId().userId
+
   const [hasPermission, setHasPermission] = useState<boolean>(false);
-  const [scanned, setScanned] = useState(false);
-  const [text, setText] = useState("Not yet scanned");
+  const [scanned, setScanned] = useState(false)
+  const [text, setText] = useState("Not yet scanned")
   const [foodNutrient, setFoodNutrient] = useState([])
   const [foodName, setFoodName] = useState("")
-  const [hasData, setHasData] = useState(false);
+  const [foodKcal, setFoodKcal] = useState(0)
+  const [foodCarbs, setFoodCarbs] = useState(0)
+  const [foodPro, setFoodPro] = useState(0)
+  const [foodFat, setFoodFat] = useState(0)
+  const [hasData, setHasData] = useState(false)
+  const [date, setDate] = useState("")
+
+  const [confirmBarcode, setConfirmBarcode] = useState(false)
+  const [portion, setPortion] = useState(1)
 
   const askForCameraPermission = () => {
     (async () => {
@@ -35,7 +66,6 @@ const BarcodeScanner = () => {
   }) => {
     setScanned(true);
     setText(data);
-    console.log("Type: " + type + "\nData: " + data);
   };
 
   const getBarcodeDataFromAPI = async (barcodeData: string) => {
@@ -61,6 +91,10 @@ const BarcodeScanner = () => {
         setHasData(true);
         setFoodNutrient(result.data[0]);
         setFoodName(result.data[0].display_name_translations.en);
+        setFoodKcal(result.data[0].nutrients.energy_calories_kcal.per_portion || 0)
+        setFoodCarbs(result.data[0].nutrients.carbohydrates.per_portion || 0)
+        setFoodPro(result.data[0].nutrients.protein.per_portion || 0)
+        setFoodFat(result.data[0].nutrients.fat.per_portion || 0)
       } catch(error){
         // no data returned from API
         setFoodName("NO DATA AVAILABLE");
@@ -80,14 +114,53 @@ const BarcodeScanner = () => {
   }, [scanned, text]);
 
   const handleConfirm = () =>{
-    console.log("Data", foodNutrient);
+    setDate("")
+    setConfirmBarcode(true);
   }
+
+  const handleSave = () =>{
+    const newData: CalorieRecord = {
+      user_id: userId,
+      record_date: date,
+      food_item: foodName,
+      cal_get: foodKcal * portion,
+      protein_gram: foodPro * portion,
+      carbs_gram: foodCarbs * portion,
+      fat_gram: foodFat * portion,
+    }
+    
+    axios.post(`${serverIP}/calorie/addrecord`, newData)
+      .then((response) => {
+        console.log('Form data submitted successfully', response.data);
+
+        setFoodName("")
+        setDate("")
+        setFoodKcal(0)
+        setFoodCarbs(0)
+        setFoodPro(0)
+        setFoodFat(0)
+      }).catch((error) => {
+        console.error('Error saving data: ', error)
+      })
+
+      setSelectedOption(null)
+  }
+
+  const handleCancel = () =>{
+    setDate("")
+    setSelectedOption(null);
+  }
+
+  const handleReturn = () =>{
+    setConfirmBarcode(false);
+  }
+
 
   // check permissions and return screens
   if (hasPermission === null) {
     return (
       <View style={styles.container}>
-        <Text>Requesting for camera permission</Text>
+        <Button title="Requesting for camera permission"/>
       </View>
     );
   }
@@ -106,28 +179,58 @@ const BarcodeScanner = () => {
 
   if (hasPermission === true) {
     return (
-      <View style={styles.container}>
-        <View style={styles.barcodebox}>
-          <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            style={{ height: 400, width: 400 }}
+      <Modal style={{...styles.container, width:'80%'}} transparent={true}>
+        {confirmBarcode? 
+        <View style={styles.modalContent}>
+          <Text>{foodName}</Text>
+          <DatePicker 
+            mode='calendar' 
+            onSelectedChange={(date: React.SetStateAction<string>) => setDate(date)}
           />
+          <Text>Portion: </Text>
+          <TextInput
+            value={portion.toString()}
+            onChangeText={(text) => setPortion(Number(text))}
+            keyboardType="numeric"
+            style={styles.input}
+          />
+          <Text>Calories (kCal per portion): {foodKcal}</Text>
+          <Text>Carbs (g per portion): {foodCarbs}</Text>
+          <Text>Protein (g per portion): {foodPro}</Text>
+          <Text>Fat (g perportion): {foodFat}</Text>
+          {date !== "" ?
+          <Button title="Save" onPress={() => handleSave()} /> : <Text style={{color: "red"}}>Choose Date</Text>}
+          <Button title="Cancel" onPress={handleReturn}/>
+        </View>:
+        <View style={styles.modalContent}>
+          <View style={styles.barcodebox}>
+            <BarCodeScanner
+              onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+              style={{ height: 400, width: 400 }}
+            />
+          </View>
+          <Text style={styles.maintext}>{text}</Text>
+          <Text style={styles.maintext}>{foodName}</Text>
+
+          {scanned && (
+            <View>
+              <Button title={"Scan again?"} onPress={() => setScanned(false)} color="tomato"/>
+            </View>
+          )}
+
+          {hasData && (
+            <View style={styles.confirmBtn}>
+              <Button title={"Confirm"} onPress={handleConfirm}/>
+            </View>
+          )}
+
+          <View style={styles.cancelBtn}>
+            <Button title={"Cancel"} onPress={handleCancel}/>
+          </View>
+
         </View>
-        <Text style={styles.maintext}>{text}</Text>
-        <Text style={styles.maintext}>{foodName}</Text>
-
-        {scanned && (
-          <View>
-            <Button title={"Scan again?"} onPress={() => setScanned(false)} color="tomato"/>
-          </View>
-        )}
-
-        {hasData && (
-          <View style={styles.confirmBtn}>
-            <Button title={"Confirm"} onPress={handleConfirm}/>
-          </View>
-        )}
-      </View>
+        }
+      </Modal>
     );
   }
 

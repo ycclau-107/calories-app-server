@@ -2,16 +2,22 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    flex:1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-
+  modalContent: {
+    flex: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+  },
   barcodebox: {
     alignItems: "center",
     justifyContent: "center",
-    height: 300,
+    height: 150,
     width: 300,
     overflow: "hidden",
     borderRadius: 30,
@@ -23,7 +29,17 @@ const styles = StyleSheet.create({
   },
   confirmBtn: {
     marginTop: 10,
-  }
+  }, 
+  cancelBtn: {
+    alignItems: "flex-end"
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
 
 });
 

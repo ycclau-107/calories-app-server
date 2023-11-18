@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Button, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Button, ScrollView, TextInput, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker'
 
@@ -7,25 +7,76 @@ import BarcodeScanner from '../BarcodeScanner/BarcodeScannerScreen';
 import { useUserId } from '../../context/userContext';
 import { serverIP } from '../../../serverConfig';
 import axios from 'axios'
+import { ActivityIndicator } from 'react-native-paper';
+
+// for displaying daily food records
+interface CalorieRecord {
+  RECORD_DATE: string;
+  'group_concat(FOOD_ITEM)': string;
+  'sum(CALORIES)': number;
+  'sum(CARBS_GRAM)': number;
+  'sum(FAT_GRAM)': number;
+  'sum(PROTEIN_GRAM)': number;
+}
+
+// for editing recorded values
+interface FoodRecord {
+  FOOD_ITEM: string;
+  CALORIES: number;
+  CARBS_GRAM: number;
+  FAT_GRAM: number;
+  PROTEIN_GRAM: number;
+}
+
 
 const CreateMealScreen: React.FC = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
+  // choose to enter meal with barcode or manually
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+
   // form reponses
   const userId = useUserId().userId
   const [selectedDate, setSelectedDate] = useState("")
-  const [selectedMeal, setSelectedMeal] = useState("")
   const [selectedFood, setSelectedFood] = useState("")
   const [selectedCarb, setSelectedCarb] = useState(0)
   const [selectedProt, setSelectedProt] = useState(0)
   const [selectedFat, setSelectedFat] = useState(0)
 
+  // main feed
+  const [ load, setLoad ] = useState(true)
+  const [ feed, setFeed ] = useState([])
+
+  // edit meals
+  const [editDate, setEditDate] = useState("")
+  const [editMode, setEditMode] = useState(false)
+  const [editedData, setEditedData] = useState<FoodRecord[]>([])
+
+  // get meal records from database
+  // updates every time after new entry recorded in db
+  useEffect(() => {
+    axios.get(serverIP + '/calorie/getrecord', {
+      params: {
+        user_id: userId,
+      },
+    }).then((response: any) => {
+      const data = response.data;
+      setFeed(data)
+    }).catch((error:any) => {
+      console.log("Get record error:", error);
+    });
+    setLoad(false)
+  },[load, selectedOption])
 
   const handleOptionSelect = (option: string) => {
     setModalVisible(false);
     setSelectedOption(option);
+
+    if (option === 'barcode') {
+      setShowBarcodeScanner(true);
+    }
   };
 
   const renderForm = () => {
@@ -98,7 +149,7 @@ const CreateMealScreen: React.FC = () => {
     console.log(selectedDate)
     
     const formData = {
-      user_id: 1,
+      user_id: userId,
       record_date: selectedDate,
       food_item: selectedFood,
       cal_get: selectedCarb*4 + selectedProt*4 + selectedFat*9,
@@ -115,7 +166,6 @@ const CreateMealScreen: React.FC = () => {
 
         // reset form fields
         setSelectedDate("")
-        setSelectedMeal("")
         setSelectedFood("")
         setSelectedCarb(0)
         setSelectedProt(0)
@@ -126,12 +176,133 @@ const CreateMealScreen: React.FC = () => {
     })
     setModalVisible(false)
     setSelectedOption(null)
+    setLoad(true)
+  };
+
+  const onItemClick = (item: string) => {
+    setEditDate(item)
+    axios.get(serverIP + '/calorie/editRecord', {
+      params: {
+        user_id: userId,
+        record_date: item
+      },
+    }).then((response: any) => {
+      const data = response.data;
+      setEditedData(data)
+    }).catch((error:any) => {
+      console.log("Get day record error:", error);
+    });
+    setEditMode(true)
+  }
+
+  const handleFieldChange = (index: number, field: keyof FoodRecord, value: string) => {
+    setEditedData((prevData) => {
+      const newData = [...prevData];
+      const numericValue = value.trim() === '' ? 0 : parseFloat(value);
+      newData[index] = { ...newData[index], [field]: field === 'FOOD_ITEM' ? value : numericValue };
+      return newData;
+    });
+  };
+
+  const handleClose = () => {
+    setEditDate("")
+    setEditedData([])
+    setEditMode(false)
+  };
+
+  const handleSave = () => {
+    const newArray = editedData.map(item => [userId, editDate, ...Object.values(item)]);
+
+    axios.put(serverIP + '/calorie/changerecord', {
+        values: newArray
+    },).then((response: any) => {
+      console.log("Values updated")
+    }).catch((error:any) => {
+      console.log("Get day record error:", error);
+    });
+
+    setEditDate("")
+    setEditedData([])
+    setEditMode(false)
+    setLoad(!load)
   };
 
   return (
     <View style={styles.container}>
-      {/* Your main content goes here */}
-      <Text>Main Content</Text>
+      {/* Meal Feed Main Content */}
+      <View style={styles.mainView}>
+        {feed.length < 1?
+          <ActivityIndicator size={"large"} color={"#2FBBF0"}/>:
+          <FlatList
+            data={feed}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem = {({ item }: { item: CalorieRecord }) => (
+              <TouchableOpacity onPress={() => onItemClick(item.RECORD_DATE)} style={styles.item}>
+                <Text>Date: {item.RECORD_DATE}</Text>
+                <Text>Food Items: {item['group_concat(FOOD_ITEM)']}</Text>
+                <Text>Calories: {item['sum(CALORIES)']}</Text>
+                <Text>Carbs: {item['sum(CARBS_GRAM)']}</Text>
+                <Text>Fat: {item['sum(FAT_GRAM)']}</Text>
+                <Text>Protein: {item['sum(PROTEIN_GRAM)']}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        }
+      </View>
+
+      {editMode === true ? (
+        <Modal>
+          <Text>{editDate}</Text>
+          {editedData.length < 1?
+          <ActivityIndicator size={"large"} color={"#2FBBF0"}/>:
+          <FlatList
+            data={editedData}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem = {({ item, index }: { item: FoodRecord; index: number }) => (
+              <View style={styles.item}>
+                <Text>Food Item: {item.FOOD_ITEM}</Text>
+
+                <Text>Calories:</Text>
+                <TextInput
+                  value={editedData[index].CALORIES.toString()}
+                  onChangeText={(text) => handleFieldChange(index, 'CALORIES', text)}
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+          
+                <Text>Carbohydrates (g):</Text>
+                <TextInput
+                  value={editedData[index].CARBS_GRAM.toString()}
+                  onChangeText={(text) => handleFieldChange(index, 'CARBS_GRAM', text)}
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+          
+                <Text>Fat (g):</Text>
+                <TextInput
+                  value={editedData[index].FAT_GRAM.toString()}
+                  onChangeText={(text) => handleFieldChange(index, 'FAT_GRAM', text)}
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+          
+                <Text>Protein (g):</Text>
+                <TextInput
+                  value={editedData[index].PROTEIN_GRAM.toString()}
+                  onChangeText={(text) => handleFieldChange(index, 'PROTEIN_GRAM', text)}
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+              </View>
+            )
+            }
+          />
+        }
+          <Button title="Save" onPress={handleSave} />
+          <Button title="Close" onPress={handleClose} />
+        </Modal>
+      ) : (<></>)}
+      
 
       {/* Floating Action Button */}
       <TouchableOpacity
@@ -160,7 +331,8 @@ const CreateMealScreen: React.FC = () => {
 
       {/* Conditionally render BarcodeScanner or Form based on the selected option */}
       {selectedOption === 'barcode' ? (
-        <BarcodeScanner />
+        <BarcodeScanner setSelectedOption={setSelectedOption}/>
+        
       ) : (
         <Modal
           animationType="slide"
@@ -207,6 +379,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5,
     width: '95%'
+  },
+  mainView: {
+    width: '90%'
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
 });
 
