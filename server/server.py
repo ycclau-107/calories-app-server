@@ -6,7 +6,6 @@ from flask import jsonify
 app = flask.Flask(__name__)
 #app.config["DEBUG"] = True //Enable debug mode to enable hot-reloader
 
-#http://10.68.166.107:5000/profile/get?username=demo&password=1234
 #log in
 @app.route('/profile/get', methods = ['GET'])
 def profile_get():
@@ -39,30 +38,30 @@ def profile_get():
 
 @app.route('/target/update', methods = ['POST'])
 def target_udpate():
+    data = request.get_json()
 
-    user_id = request.args.get('user_id', '')
-    bmr = request.args.get('bmr', '')
-    tdee = request.args.get('tdee', '')
-    protein_gram = request.args.get('protein_gram', '')
-    protein_per = request.args.get('protein_per', '')
-    protein_cal = request.args.get('protein_cal', '')
-    carbs_gram = request.args.get('carbs_gram', '')
-    carbs_per = request.args.get('carbs_per', '')
-    carbs_cal = request.args.get('carbs_cal', '')
-    fat_gram = request.args.get('fat_gram', '')
-    fat_per = request.args.get('fat_per', '')
-    fat_cal = request.args.get('fat_cal', '')
+    user_id = data['user_id']
+    bmr = data['bmr']
+    tdee = data['tdee']
+    protein_gram = data['protein']['gram']
+    protein_per = data['protein']['percentrage']
+    protein_cal = data['protein']['calorie']
+    carbs_gram = data['carbs']['gram']
+    carbs_per = data['carbs']['percentrage']
+    carbs_cal = data['carbs']['calorie']
+    fat_gram = data['fat']['gram']
+    fat_per = data['fat']['percentrage']
+    fat_cal = data['fat']['calorie']
     
     con = sqlite3.connect('calories-db.db')
-    cursor = con.execute("""
-    SELECT TARGET_ID FROM target
-    WHERE USER_ID = ?
-    """,(user_id, ))
-    row = cursor.fetchone()
+    cursor = con.cursor()
 
-    target_id = row[0]
-    if(row is not None):
-        con.execute("""
+    # check target exists or not
+    cursor.execute("""SELECT COUNT(*) FROM target WHERE USER_ID = ?""",(user_id,))
+    record_exists = cursor.fetchone()[0] > 0
+
+    if record_exists:
+        cursor.execute("""
     UPDATE target SET 
                     BMR =?, 
                     TDEE = ?, 
@@ -75,7 +74,7 @@ def target_udpate():
                     FAT_GRAM = ?, 
                     FAT_PER = ?, 
                     FAT_CAL = ?
-    WHERE TARGET_ID = ?
+    WHERE USER_ID = ?
     """,(bmr, 
          tdee, 
          protein_gram, 
@@ -87,10 +86,36 @@ def target_udpate():
          fat_gram, 
          fat_per, 
          fat_cal, 
-         target_id))
-        
+         user_id))
+    else:
+        cursor.execute("""INERT INTO target 
+                       (USER_ID, 
+                       BMR, 
+                       TDEE, 
+                        PROTEIN_GRAM, 
+                        PROTEIN_PER, 
+                        PROTEIN_CAL, 
+                        CARBS_GRAM, 
+                        CARBS_PER, 
+                        CARBS_CAL, 
+                        FAT_GRAM, 
+                        FAT_PER, 
+                        FAT_CAL) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (user_id,
+                        bmr,
+                        tdee,
+                        protein_gram,
+                        protein_per,
+                        protein_cal,
+                        carbs_gram,
+                        carbs_per,
+                        carbs_cal,
+                        fat_gram,
+                        fat_per,
+                        fat_cal))
+
     outdata = {
-        "message": "Target data added successfully"
+        "message": "User:"+ str(user_id) +"'s Target has been updated or inserted."
     }
 
     con.commit()
@@ -143,19 +168,21 @@ def target_get():
 
 @app.route('/calorie/addrecord', methods = ['POST'])
 def calorie_addrecord():
-    user_id = request.args.get('user_id','')
-    record_date = request.args.get('record_date')
-    food_item = request.args.get('food_item', '')
-    calories = request.args.get('cal_get','')
-    protein_gram = request.args.get('protein_gram','')
-    carbs_gram = request.args.get('carbs_gram','')
-    fat_gram = request.args.get('fat_gram','')
+
+    data = request.get_json()
+
+    user_id = data['user_id']
+    food_item = data['food_item']
+    calories = data['cal_get']
+    protein_gram = data['protein_gram']
+    carbs_gram = data['carbs_gram']
+    fat_gram = data['fat_gram']
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
-         """INSERT INTO calorie_record (USER_ID, RECORD_DATE, FOOD_ITEM< CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
+         """INSERT INTO calorie_record (USER_ID, FOOD_ITEM, CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
         VALUES (?, ?, ?, ?)""",
-        (user_id, record_date, food_item, calories, protein_gram, carbs_gram, fat_gram)
+        (user_id, food_item, calories, protein_gram, carbs_gram, fat_gram)
     )
     con.commit()
     con.close()
@@ -226,10 +253,47 @@ def calorie_report():
     con.close()
     return outdata
 
+@app.route('/calories/get/weeksum',methods = ['GET'])
+def getCalorieWeekSum():
+    user_id = request.args.get('user_id','')
+
+    con = sqlite3.connect('calories-db.db')
+    cursor_r = con.execute("""
+                            SELECT RECORD_DATE, SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calorie
+                            WHERE USER_ID = ? 
+                            AND RECORD_DATE >= DATE('now', '-7 days)
+                            GROUP BY RECORD_DATE
+                            ORDER BY RECORD_DATE DESC
+                            """,(user_id,))
+
+    rows = cursor_r.fetchall()
+    results = []
+
+    for row in rows:
+        date = row[0]
+        calorie = row[1]
+        protein = row[2]
+        carbs = row[3]
+        fat = row[4]
+        result = {
+            date: date,
+            calorie: calorie,
+            protein: protein,
+            carbs: carbs,
+            fat: fat
+        }
+        results.append(result)
+    resultJson = json.dumps(results)
+
+    con.close()
+
+    return resultJson
+
 @app.route('/weight/add',methods = ['POST'])
 def weight_addrecord():
-    user_id = request.args.get('user_id')
-    weight = request.args.get('weight')
+    data = request.get_json()
+    user_id = data['user_id']
+    weight = data['weight']
     
     con = sqlite3.connect('calories-db.db')
     con.execute("""
@@ -283,10 +347,12 @@ def weight_getrecord():
 
 @app.route('/exercise/add', methods = ['POST'])
 def exercise_record_add():
-    user_id = request.form.get('user_id')
-    calories = request.form.get('calories')
-    type = request.form.get('type')
-    heartrate = request.form.get('heartrate')
+    data = request.get_json()
+
+    user_id = data['user_id']
+    calories = data['calories']
+    type = data['type']
+    heartrate = data['heartrate']
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
