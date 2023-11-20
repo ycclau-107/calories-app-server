@@ -181,7 +181,7 @@ def calorie_addrecord():
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
-         """INSERT INTO calorie_record (USER_ID, FOOD_ITEM, CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
+         """INSERT INTO calorie (USER_ID, FOOD_ITEM, CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
         VALUES (?, ?, ?, ?)""",
         (user_id, food_item, calories, protein_gram, carbs_gram, fat_gram)
     )

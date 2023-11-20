@@ -37,7 +37,7 @@ con.execute("""CREATE TABLE IF NOT EXISTS target (
     );""")
 
 #create calorie record table
-con.execute("""CREATE TABLE IF NOT EXISTS calorie_record (
+con.execute("""CREATE TABLE IF NOT EXISTS calorie (
             C_RECORD_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             RECORD_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             USER_ID INTEGER NOT NULL,
