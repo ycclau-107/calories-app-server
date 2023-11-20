@@ -157,7 +157,7 @@ con.execute("""INSERT INTO target (
     demo_fat_cal))
 
 con.execute(
-    """INSERT INTO calorie_record(
+    """INSERT INTO calorie(
         USER_ID, 
         RECORD_DATE,
         FOOD_ITEM,
