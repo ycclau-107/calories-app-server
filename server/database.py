@@ -57,7 +57,9 @@ con.execute("""CREATE TABLE IF NOT EXISTS calorie (
             CALORIES INTEGER NOT NULL,
             PROTEIN_GRAM INTEGER,
             CARBS_GRAM INTEGER,
-            FAT_GRAM INTEGER
+            FAT_GRAM INTEGER,
+            PHOTO TEXT,
+            INPUT TEXT
             );""")
 
 #create exercise record table
@@ -90,7 +92,7 @@ con.execute("""CREATE TABLE IF NOT EXISTS weight(
 
 
 # for profile in demoData_profile:
-#     insertQuery = "INSERT INTO login (USERNAME, PASSWORD, NAME) values (?,?,?);"
+#     insertQuery = "INSERT INTO profile (USERNAME, PASSWORD, NAME) values (?,?,?);"
 #     con.execute(insertQuery,(profile['username'],profile['password'],profile['name']))
 
 # #insert target data into account demo
@@ -177,16 +179,18 @@ con.execute(
         CALORIES, 
         PROTEIN_GRAM, 
         CARBS_GRAM, 
-        FAT_GRAM
+        FAT_GRAM,
+        PHOTO,
+        INPUT
     ) 
     VALUES 
-        (1, "2023-11-17", "Cheese", 402.2, 1.3, 25, 33), 
-        (1, "2023-11-17", "Cocoa Powder", 306, 25, 20, 14),
-        (1, "2023-11-17", "Cesar Salad", 354, 14, 7, 30),
-        (1, "2023-11-16", "Oyster", 201, 12, 9, 13),
-        (1, "2023-11-15", "Egg Tart", 382.06, 52.06, 7.77, 15.86),
-        (1, "2023-11-14", "Chia seeds", 379, 8, 17, 31),
-        (1, "2023-11-14", "Bacon", 404.6, 0.4, 13, 39)"""
+        (1, "2023-11-17", "Cheese", 402.2, 1.3, 25, 33, "", "Manual"), 
+        (1, "2023-11-17", "Cocoa Powder", 306, 25, 20, 14, "", "Manual"),
+        (1, "2023-11-17", "Cesar Salad", 354, 14, 7, 30, "", "Manual"),
+        (1, "2023-11-16", "Oyster", 201, 12, 9, 13, "", "Manual"),
+        (1, "2023-11-15", "Egg Tart", 382.06, 52.06, 7.77, 15.86, "", "Manual"),
+        (1, "2023-11-14", "Chia seeds", 379, 8, 17, 31, "", "Manual"),
+        (1, "2023-11-14", "Bacon", 404.6, 0.4, 13, 39, "", "Manual")"""
     )
 
 con.commit()
