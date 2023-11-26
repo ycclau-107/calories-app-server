@@ -89,7 +89,7 @@ def target_udpate():
          fat_cal, 
          user_id))
     else:
-        cursor.execute("""INERT INTO target 
+        cursor.execute("""INSERT INTO target 
                        (USER_ID, 
                        BMR, 
                        TDEE, 
@@ -178,16 +178,48 @@ def calorie_addrecord():
     protein_gram = data['protein_gram']
     carbs_gram = data['carbs_gram']
     fat_gram = data['fat_gram']
+    photo = data['photo']
+    input = data["input"]
 
     con = sqlite3.connect('calories-db.db')
     con.execute(
-         """INSERT INTO calorie (USER_ID, FOOD_ITEM, CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM)
-        VALUES (?, ?, ?, ?)""",
-        (user_id, food_item, calories, protein_gram, carbs_gram, fat_gram)
+         """INSERT INTO calorie (USER_ID, FOOD_ITEM, CALORIES, PROTEIN_GRAM, CARBS_GRAM, FAT_GRAM, PHOTO, INPUT)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, food_item, calories, protein_gram, carbs_gram, fat_gram, photo, input)
     )
     con.commit()
     con.close()
     return {"result": "calorie record added"}
+
+@app.route('/calorie/viewrecords', methods = ['GET'])
+def calorie_viewrecord():
+
+    user_id = request.args.get('user_id')
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute("""SELECT 
+                         RECORD_DATE,
+                         FOOD_ITEM,
+                         CALORIES,
+                         PROTEIN_GRAM,
+                         CARBS_GRAM,
+                         FAT_GRAM,
+                         PHOTO,
+                         INPUT
+                        FROM calorie
+                        WHERE USER_ID = ?
+                        ORDER BY RECORD_DATE DESC
+                        """,
+                        (user_id))
+                        
+    records = [dict((cursor.description[i][0], value) \
+                    for i, value in enumerate(row)) for row in cursor.fetchall()]
+    
+    records = jsonify(records)
+
+    con.commit()
+    con.close()
+    return records
 
 #http://10.68.166.107:5000/calories/get/dailyreport?user_id=1
 @app.route('/calories/get/dailyreport',methods = ['GET'])
