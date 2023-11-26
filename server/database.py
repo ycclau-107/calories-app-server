@@ -4,9 +4,9 @@ import sqlite3
 #The .db file is created automatically if it does not exist
 con = sqlite3.connect('calories-db.db')
 
-#Creates profile table
+#Creates login table
 con.execute(
-    """CREATE TABLE IF NOT EXISTS profile (
+    """CREATE TABLE IF NOT EXISTS login (
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     CREATE_TIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     USERNAME TEXT NOT NULL,
@@ -20,6 +20,10 @@ con.execute("""CREATE TABLE IF NOT EXISTS target (
     TARGET_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     USER_ID INTEGER NOT NULL,
     UPDATED_TIME TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+    ACITVE INTEGER NOT NULL,
+    DIETSTYLE TEXT NOT NULL,
+            
     BMR NUMBER NOT NULL,
     TDEE NUMBER NOT NULL,
     

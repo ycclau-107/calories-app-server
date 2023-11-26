@@ -8,14 +8,14 @@ app = flask.Flask(__name__)
 #app.config["DEBUG"] = True //Enable debug mode to enable hot-reloader
 
 #log in
-@app.route('/profile/get', methods = ['GET'])
-def profile_get():
+@app.route('/profile/login/signin', methods = ['GET'])
+def login_get():
     username = request.args.get('username','')
     password = request.args.get('password','')
 
     con = sqlite3.connect('calories-db.db')
     cursor = con.execute(
-        """SELECT ID, NAME FROM profile
+        """SELECT ID, NAME FROM login
         WHERE USERNAME = ? AND PASSWORD = ?""",
         (username, password))
     
@@ -37,60 +37,121 @@ def profile_get():
 
     return outdata
 
+@app.route('/profile/login/check-username', methods = ['GET'])
+def login_check_username():
+    username = request.args.get('username','')
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute(
+        """SELECT COUNT(*) FROM login
+        WHERE USERNAME = ?""",
+        (username,))
+    
+    count = cursor.fetchone()[0]
+    con.close()
+
+    if(count == 1):
+        return {"error": "This username has been already registered."}
+    else:
+        return {"result": "This username has not been taken."}
+
+@app.route('/profile/login/signup', methods = ['POST'])
+def signup():
+    data = request.get_json()
+    username = data["username"]
+    password = data["password"]
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute("""INSERT INTO login (username, password) VALUES
+                         (?, ?)""",
+                         username,
+                         password)
+    
+    con.commit()
+    con.close()
+    return {"message": "Sign up is completed"}
+
 @app.route('/target/update', methods = ['POST'])
 def target_udpate():
-    data = request.get_json()
+    datas = request.get_json()
 
-    user_id = data['user_id']
-    bmr = data['bmr']
-    tdee = data['tdee']
-    protein_gram = data['protein']['gram']
-    protein_per = data['protein']['percentrage']
-    protein_cal = data['protein']['calorie']
-    carbs_gram = data['carbs']['gram']
-    carbs_per = data['carbs']['percentrage']
-    carbs_cal = data['carbs']['calorie']
-    fat_gram = data['fat']['gram']
-    fat_per = data['fat']['percentrage']
-    fat_cal = data['fat']['calorie']
-    
     con = sqlite3.connect('calories-db.db')
     cursor = con.cursor()
 
     # check target exists or not
-    cursor.execute("""SELECT COUNT(*) FROM target WHERE USER_ID = ?""",(user_id,))
-    record_exists = cursor.fetchone()[0] > 0
+    cursor.execute("""SELECT TARGET_ID FROM target 
+                   WHERE USER_ID = ? AND CURRENT = 1
+                   ORDER BY ACTIVE DESC""",(datas[0]["user_id"],))
+    rows = cursor.fetchall()
 
-    if record_exists:
-        cursor.execute("""
-    UPDATE target SET 
-                    BMR =?, 
-                    TDEE = ?, 
-                    PROTEIN_GRAM = ?, 
-                    PROTEIN_PER = ?, 
-                    PROTEIN_CAL = ?, 
-                    CARBS_GRAM = ?, 
-                    CARBS_PER = ?, 
-                    CARBS_CAL = ?, 
-                    FAT_GRAM = ?, 
-                    FAT_PER = ?, 
-                    FAT_CAL = ?
-    WHERE USER_ID = ?
-    """,(bmr, 
-         tdee, 
-         protein_gram, 
-         protein_per, 
-         protein_cal, 
-         carbs_gram, 
-         carbs_per, 
-         carbs_cal, 
-         fat_gram, 
-         fat_per, 
-         fat_cal, 
-         user_id))
+    if(len(rows) != 0):
+        # update active target
+        for i in range(len(rows)):
+
+            tid = rows[i][0]
+            user_id = datas[i]['user_id']
+            dietstyle = datas[i]['dietstyle']
+            bmr = datas[i]['bmr']
+            tdee = datas[i]['tdee']
+            protein_gram = datas[i]['protein']['gram']
+            protein_per = datas[i]['protein']['percentage']
+            protein_cal = datas[i]['protein']['calorie']
+            carbs_gram = datas[i]['carbs']['gram']
+            carbs_per = datas[i]['carbs']['percentage']
+            carbs_cal = datas[i]['carbs']['calorie']
+            fat_gram = datas[i]['fat']['gram']
+            fat_per = datas[i]['fat']['percentage']
+            fat_cal = datas[i]['fat']['calorie']
+            cursor.execute("""
+            UPDATE target SET 
+                            DIETSTYLE = ?,
+                            BMR = ?, 
+                            TDEE = ?, 
+                            PROTEIN_GRAM = ?, 
+                            PROTEIN_PER = ?, 
+                            PROTEIN_CAL = ?, 
+                            CARBS_GRAM = ?, 
+                            CARBS_PER = ?, 
+                            CARBS_CAL = ?, 
+                            FAT_GRAM = ?, 
+                            FAT_PER = ?, 
+                            FAT_CAL = ?
+            WHERE TARGET_ID = ?
+            """,(dietstyle, 
+                bmr, 
+                tdee, 
+                protein_gram, 
+                protein_per, 
+                protein_cal, 
+                carbs_gram, 
+                carbs_per, 
+                carbs_cal, 
+                fat_gram, 
+                fat_per, 
+                fat_cal, 
+                tid))
+        return {"message": "User:"+ str(user_id) +"'s Target has been updated."
+    }
     else:
+        active = [1, 0, 0]
+        for data, iAct in enumerate(datas,active):
+            user_id = data['user_id']
+            dietstyle = data['dietstyle']
+            bmr = data['bmr']
+            tdee = data['tdee']
+            protein_gram = data['protein']['gram']
+            protein_per = data['protein']['percentage']
+            protein_cal = data['protein']['calorie']
+            carbs_gram = data['carbs']['gram']
+            carbs_per = data['carbs']['percentage']
+            carbs_cal = data['carbs']['calorie']
+            fat_gram = data['fat']['gram']
+            fat_per = data['fat']['percentage']
+            fat_cal = data['fat']['calorie']
+
         cursor.execute("""INSERT INTO target 
                        (USER_ID, 
+                       ACITVE,
+                       DIETSTYLE,
                        BMR, 
                        TDEE, 
                         PROTEIN_GRAM, 
@@ -103,6 +164,8 @@ def target_udpate():
                         FAT_PER, 
                         FAT_CAL) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                         (user_id,
+                        iAct,
+                        dietstyle,
                         bmr,
                         tdee,
                         protein_gram,
@@ -116,7 +179,7 @@ def target_udpate():
                         fat_cal))
 
     outdata = {
-        "message": "User:"+ str(user_id) +"'s Target has been updated or inserted."
+        "message": "User:"+ str(user_id) +"'s Target has been inserted."
     }
 
     con.commit()
@@ -129,7 +192,9 @@ def target_get():
     user_id = request.args.get('user_id','')
 
     con = sqlite3.connect('calories-db.db')
-    cursor = con.execute("""SELECT BMR, 
+    cursor = con.execute("""SELECT 
+                        DIETSTYLE, 
+                        BMR, 
                         TDEE, 
                         PROTEIN_GRAM, 
                         PROTEIN_PER, 
@@ -142,30 +207,38 @@ def target_get():
                         FAT_CAL
                         FROM target
                         WHERE USER_ID = ?
+                        ORDER BY ACTIVE DESC
                         """,
                         (user_id,))
     
-    row = cursor.fetchone()
-    outdata = {
-        'bmr': row[0],
-        'tdee': row[1],
-        'protein':{
-            'percentage': row[3],
-            'gram': row[2],
-            'calorie': row[4],
-        },
-        'carbs':{
-            'percentage': row[6],
-            'gram': row[5],
-            'calorie': row[7],
-        },
-        'fat':{
-            'percentage': row[9],
-            'gram': row[8],
-            'calorie': row[10],
-        }
-    }
-    return outdata
+    rows = cursor.fetchall()
+    outdata = []
+    if(len(rows) == 0):
+        return {"error": "no target found"}
+    elif(len(rows) != 0):
+        for row in rows:
+            data = {
+                'dietstyle': row[0],
+                'bmr': row[1],
+                'tdee': row[2],
+                'protein':{
+                    'percentage': row[4],
+                    'gram': row[3],
+                    'calorie': row[5],
+                },
+                'carbs':{
+                    'percentage': row[7],
+                    'gram': row[6],
+                    'calorie': row[8],
+                },
+                'fat':{
+                    'percentage': row[10],
+                    'gram': row[9],
+                    'calorie': row[11],
+                }}
+            outdata.append(data)
+        
+    return jsonify(outdata)
 
 @app.route('/calorie/addrecord', methods = ['POST'])
 def calorie_addrecord():
@@ -221,7 +294,6 @@ def calorie_viewrecord():
     con.close()
     return records
 
-#http://10.68.166.107:5000/calories/get/dailyreport?user_id=1
 @app.route('/calories/get/dailyreport',methods = ['GET'])
 def calorie_report():
     user_id = request.args.get('user_id','')
@@ -337,7 +409,6 @@ def weight_addrecord():
     con.close()
     return {'result': "weight record added"}
 
-#http://10.68.166.107:5000/weight/get?user_id=1
 @app.route('/weight/get', methods = ['GET'])
 def weight_getrecord():
     user_id = request.args.get('user_id','')
@@ -397,7 +468,6 @@ def exercise_record_add():
     con.close()
     return {"result": "exercise record added"}
 
-#http://10.68.166.107:5000/exercise/get?user_id=1
 @app.route('/exercise/get', methods = ['GET'])
 def exercise_getrecord():
     user_id = request.args.get('userid')
