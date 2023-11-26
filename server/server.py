@@ -8,14 +8,14 @@ app = flask.Flask(__name__)
 #app.config["DEBUG"] = True //Enable debug mode to enable hot-reloader
 
 #log in
-@app.route('/profile/get', methods = ['GET'])
-def profile_get():
+@app.route('/profile/login/signin', methods = ['GET'])
+def login_get():
     username = request.args.get('username','')
     password = request.args.get('password','')
 
     con = sqlite3.connect('calories-db.db')
     cursor = con.execute(
-        """SELECT ID, NAME FROM profile
+        """SELECT ID, NAME FROM login
         WHERE USERNAME = ? AND PASSWORD = ?""",
         (username, password))
     
@@ -36,6 +36,39 @@ def profile_get():
     con.close()
 
     return outdata
+
+@app.route('/profile/login/check-username', methods = ['GET'])
+def login_check_username():
+    username = request.args.get('username','')
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute(
+        """SELECT COUNT(*) FROM login
+        WHERE USERNAME = ?""",
+        (username,))
+    
+    count = cursor.fetchone()[0]
+    con.close()
+
+    if(count == 1):
+        return {"error": "This username has been already registered."}
+    else:
+        return {"result": "This username has not been taken."}
+
+@app.route('/profile/login/signup', methods = ['POST'])
+def signup():
+    data = request.get_json()
+    username = data["username"]
+    password = data["password"]
+
+    con = sqlite3.connect('calories-db.db')
+    cursor = con.execute("""INSERT INTO login (username, password) VALUES
+                         (?, ?)""",
+                         username,
+                         password)
+    
+    con.commit()
+    con.close()
+    return {"message": "Sign up is completed"}
 
 @app.route('/target/update', methods = ['POST'])
 def target_udpate():
@@ -344,7 +377,6 @@ def weight_addrecord():
     con.close()
     return {'result': "weight record added"}
 
-#http://10.68.166.107:5000/weight/get?user_id=1
 @app.route('/weight/get', methods = ['GET'])
 def weight_getrecord():
     user_id = request.args.get('user_id','')
@@ -404,7 +436,6 @@ def exercise_record_add():
     con.close()
     return {"result": "exercise record added"}
 
-#http://10.68.166.107:5000/exercise/get?user_id=1
 @app.route('/exercise/get', methods = ['GET'])
 def exercise_getrecord():
     user_id = request.args.get('userid')
