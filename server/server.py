@@ -56,15 +56,14 @@ def login_check_username():
 
 @app.route('/profile/login/signup', methods = ['POST'])
 def signup():
-    data = request.get_json()
+    data = request.json
     username = data["username"]
     password = data["password"]
 
     con = sqlite3.connect('calories-db.db')
-    cursor = con.execute("""INSERT INTO login (username, password) VALUES
+    cursor = con.execute("""INSERT INTO login (USERNAME, PASSWORD) VALUES
                          (?, ?)""",
-                         username,
-                         password)
+                         (username,password))
     
     con.commit()
     con.close()
@@ -186,7 +185,6 @@ def target_udpate():
     con.close()
     return outdata
 
-#http://10.68.166.107:5000/target/get?user_id=1
 @app.route('/target/get', methods = ['GET'])
 def target_get():
     user_id = request.args.get('user_id','')
@@ -334,7 +332,7 @@ def getCalorieWeekSum():
     cursor_r = con.execute("""
                             SELECT RECORD_DATE, SUM(CALORIES), SUM(PROTEIN_GRAM), SUM(CARBS_GRAM), SUM(FAT_GRAM) FROM calorie
                             WHERE USER_ID = ? 
-                            AND RECORD_DATE >= DATE('now', '-7 days)
+                            AND RECORD_DATE >= DATE('now', '-7 days')
                             GROUP BY RECORD_DATE
                             ORDER BY RECORD_DATE DESC
                             """,(user_id,))
@@ -356,7 +354,7 @@ def getCalorieWeekSum():
             fat: fat
         }
         results.append(result)
-    resultJson = json.dumps(results)
+    resultJson = jsonify(results)
 
     con.close()
 
