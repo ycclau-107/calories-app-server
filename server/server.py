@@ -64,10 +64,14 @@ def signup():
     cursor = con.execute("""INSERT INTO login (USERNAME, PASSWORD) VALUES
                          (?, ?)""",
                          (username,password))
-    
     con.commit()
+
+    cursor = con.execute("""SELECT ID FROM login WHERE USERNAME = ?""",(username,))
+    row = cursor.fetchone()
+    userid = row[0]
     con.close()
-    return {"message": "Sign up is completed"}
+    return {"message": str(username) + "Sign up is completed",
+            "userid":userid}
 
 @app.route('/target/update', methods = ['POST'])
 def target_udpate():
