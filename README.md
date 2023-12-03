@@ -1,4 +1,4 @@
-# calories-app
+# calories-app-server
 
 ## 1. Remove existing database(optional)
 To prevent any potential error with previous records, you may want to remove the existing database(if any) in your directory:
