@@ -33,5 +33,14 @@ Press CTRL+C to quit
 ```
 
 ## 3. Let the application connect to the server
-you should store the ```{PublicServerIP}``` to the ```calories-app/serverConfig.js``` for the item ```{serverIP}```
+You should store the ```{PublicServerIP}``` to the ```calories-app/serverConfig.js``` for the item ```serverIP```
 and change the ```serverMode``` to ```"online"``` to enable the connectivity between applicaiton and server.
+
+The final version of ```calories-app/serverConfig.js``` should be as follows:
+```
+// serverConfig.js
+module.exports = {
+    "serverIP": "{PublicServerIP}",
+    "serverMode": "online" //online OR offline
+}
+```
